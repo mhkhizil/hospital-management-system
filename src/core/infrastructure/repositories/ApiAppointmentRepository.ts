@@ -1,6 +1,7 @@
 import { Appointment } from "@/core/domain/entities/Appointment";
 import type { IAppointmentRepository } from "@/core/domain/repositories/IAppointmentRepository";
 import { HttpClient } from "@/core/infrastructure/api/HttpClient";
+import { API_ENDPOINTS } from "@/core/infrastructure/api/constants";
 
 type AppointmentResponse = {
   id: string;
@@ -44,7 +45,7 @@ export class ApiAppointmentRepository implements IAppointmentRepository {
   async fetchUpcoming(): Promise<Appointment[]> {
     try {
       const { data } = await this.http.get<AppointmentResponse[]>(
-        "/appointments"
+        API_ENDPOINTS.APPOINTMENTS.LIST
       );
       return data.map(
         (item) =>

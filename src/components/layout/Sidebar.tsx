@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { mainNavigation } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { useAuth } from "@/core/presentation/context/AuthContext";
 
 type SidebarProps = {
   isMobileOpen: boolean;
@@ -11,6 +12,14 @@ type SidebarProps = {
 };
 
 export function Sidebar({ isMobileOpen, onClose }: SidebarProps) {
+  const { user } = useAuth();
+  const isRootUser = user?.isRootUser() ?? false;
+
+  // Filter navigation items based on user role
+  const visibleNavigation = mainNavigation.filter(
+    (item) => !item.rootOnly || isRootUser
+  );
+
   return (
     <aside
       className={cn(
@@ -31,7 +40,7 @@ export function Sidebar({ isMobileOpen, onClose }: SidebarProps) {
         </div>
 
         <nav className="mt-10 space-y-1">
-          {mainNavigation.map((item) => (
+          {visibleNavigation.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -64,5 +73,3 @@ export function Sidebar({ isMobileOpen, onClose }: SidebarProps) {
     </aside>
   );
 }
-
-
