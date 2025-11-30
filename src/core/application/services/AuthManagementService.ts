@@ -1,4 +1,9 @@
-import type { IAuthRepository, RegisterData } from "@/core/domain/repositories/IAuthRepository";
+import type {
+  IAuthRepository,
+  RegisterData,
+  UpdateProfileData,
+  UpdateProfileResult,
+} from "@/core/domain/repositories/IAuthRepository";
 import type { IAuthService } from "@/core/domain/services/IAuthService";
 import type { TokenManagementService } from "@/core/infrastructure/services/TokenManagementService";
 import { User } from "@/core/domain/entities/User";
@@ -101,6 +106,25 @@ export class AuthManagementService implements IAuthService {
 
       return null;
     }
+  }
+
+  /**
+   * Update current user's profile
+   */
+  async updateProfile(data: UpdateProfileData): Promise<UpdateProfileResult> {
+    const result = await this.authRepository.updateProfile(data);
+
+    // Update cached user data
+    this.tokenService.setUser(
+      JSON.stringify({
+        id: result.user.id,
+        name: result.user.name,
+        email: result.user.email,
+        role: result.user.role,
+      })
+    );
+
+    return result;
   }
 
   /**

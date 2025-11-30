@@ -17,6 +17,18 @@ export interface RegisterData {
   role: "doctor" | "nurse" | "admission";
 }
 
+export interface UpdateProfileData {
+  name?: string;
+  email?: string;
+  password?: string;
+  password_confirmation?: string;
+}
+
+export interface UpdateProfileResult {
+  message: string;
+  user: User;
+}
+
 /**
  * Auth Repository Interface
  * Defines data access operations for authentication
@@ -41,5 +53,10 @@ export interface IAuthRepository {
    * Fetch current authenticated user from API
    */
   fetchCurrentUser(): Promise<User>;
+
+  /**
+   * Update current user's profile
+   */
+  updateProfile(data: UpdateProfileData): Promise<UpdateProfileResult>;
 }
 

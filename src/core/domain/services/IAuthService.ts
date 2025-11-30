@@ -1,5 +1,9 @@
 import type { User } from "../entities/User";
-import type { RegisterData } from "../repositories/IAuthRepository";
+import type {
+  RegisterData,
+  UpdateProfileData,
+  UpdateProfileResult,
+} from "../repositories/IAuthRepository";
 
 /**
  * Auth Service Interface
@@ -25,6 +29,11 @@ export interface IAuthService {
    * Get current authenticated user
    */
   getCurrentUser(): Promise<User | null>;
+
+  /**
+   * Update current user's profile
+   */
+  updateProfile(data: UpdateProfileData): Promise<UpdateProfileResult>;
 
   /**
    * Check if user is authenticated

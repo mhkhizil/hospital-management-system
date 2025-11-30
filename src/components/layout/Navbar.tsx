@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, LogOut, User, ChevronDown } from "lucide-react";
+import { Menu, LogOut, User, ChevronDown, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -75,7 +75,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
       </div>
       <div className="flex items-center gap-3">
         <ThemeToggle />
-        
+
         {/* User Menu Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -109,11 +109,11 @@ export function Navbar({ onMenuClick }: NavbarProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => navigate("/settings")}
+              onClick={() => navigate("/profile")}
               className="cursor-pointer"
             >
               <User className="mr-2 h-4 w-4" />
-              <span>Profile Settings</span>
+              <span>Profile</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem

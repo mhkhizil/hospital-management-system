@@ -9,7 +9,11 @@ import {
 } from "react";
 import { User, type UserRole } from "@/core/domain/entities/User";
 import type { IAuthService } from "@/core/domain/services/IAuthService";
-import type { RegisterData } from "@/core/domain/repositories/IAuthRepository";
+import type {
+  RegisterData,
+  UpdateProfileData,
+  UpdateProfileResult,
+} from "@/core/domain/repositories/IAuthRepository";
 import { container, TOKENS } from "@/core/infrastructure/di/container";
 import type { HttpClient } from "@/core/infrastructure/api/HttpClient";
 
@@ -30,6 +34,7 @@ interface AuthContextValue extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (userData: RegisterData) => Promise<User>;
+  updateProfile: (data: UpdateProfileData) => Promise<UpdateProfileResult>;
   clearError: () => void;
   hasRole: (role: UserRole) => boolean;
   hasAnyRole: (roles: UserRole[]) => boolean;
@@ -150,7 +155,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         });
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : "Login failed. Please try again.";
+          error instanceof Error
+            ? error.message
+            : "Login failed. Please try again.";
 
         setState((prev) => ({
           ...prev,
@@ -214,6 +221,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   /**
+   * Update current user's profile
+   */
+  const updateProfile = useCallback(
+    async (data: UpdateProfileData): Promise<UpdateProfileResult> => {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+      try {
+        const result = await authService.updateProfile(data);
+
+        // Update user in state
+        setState((prev) => ({
+          ...prev,
+          user: result.user,
+          isLoading: false,
+        }));
+
+        return result;
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to update profile. Please try again.";
+
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: message,
+        }));
+
+        throw error;
+      }
+    },
+    [authService]
+  );
+
+  /**
    * Clear error state
    */
   const clearError = useCallback(() => {
@@ -249,12 +292,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
       login,
       logout,
       register,
+      updateProfile,
       clearError,
       hasRole,
       hasAnyRole,
       isRootUser: state.user?.isRootUser() ?? false,
     }),
-    [state, login, logout, register, clearError, hasRole, hasAnyRole]
+    [
+      state,
+      login,
+      logout,
+      register,
+      updateProfile,
+      clearError,
+      hasRole,
+      hasAnyRole,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

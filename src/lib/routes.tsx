@@ -7,6 +7,7 @@ import {
 import LoginPage from "@/pages/Login";
 import RegisterPage from "@/pages/Register";
 import UserManagementPage from "@/pages/UserManagement";
+import ProfilePage from "@/pages/Profile";
 import DashboardPage from "@/pages/Dashboard";
 import PatientsPage from "@/pages/Patients";
 import AppointmentsPage from "@/pages/Appointments";
@@ -55,6 +56,7 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      { path: "profile", element: <ProfilePage /> },
       { path: "settings", element: <SettingsPage /> },
     ],
   },

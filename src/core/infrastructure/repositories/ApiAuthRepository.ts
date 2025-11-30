@@ -3,6 +3,8 @@ import type {
   IAuthRepository,
   LoginResult,
   RegisterData,
+  UpdateProfileData,
+  UpdateProfileResult,
 } from "@/core/domain/repositories/IAuthRepository";
 import { HttpClient, ApiError } from "@/core/infrastructure/api/HttpClient";
 import { API_ENDPOINTS } from "@/core/infrastructure/api/constants";
@@ -197,5 +199,65 @@ export class ApiAuthRepository implements IAuthRepository {
       data.user.created_at,
       data.user.updated_at
     );
+  }
+
+  /**
+   * Update current user's profile
+   */
+  async updateProfile(data: UpdateProfileData): Promise<UpdateProfileResult> {
+    try {
+      // Sanitize email if provided
+      const sanitizedData = {
+        ...data,
+        email: data.email ? sanitizeEmail(data.email) : undefined,
+        name: data.name?.trim(),
+      };
+
+      // Remove undefined fields
+      const payload = Object.fromEntries(
+        Object.entries(sanitizedData).filter(([_, v]) => v !== undefined)
+      );
+
+      interface UpdateProfileResponseDTO {
+        message: string;
+        user: {
+          id: number;
+          name: string;
+          email: string;
+          role: UserRole;
+          email_verified_at: string | null;
+          updated_at: string;
+        };
+      }
+
+      const { data: response } = await this.http.put<UpdateProfileResponseDTO>(
+        API_ENDPOINTS.AUTH.UPDATE_PROFILE,
+        payload
+      );
+
+      const user = new User(
+        response.user.id,
+        response.user.name,
+        response.user.email,
+        response.user.role,
+        response.user.email_verified_at,
+        undefined,
+        response.user.updated_at
+      );
+
+      return {
+        message: response.message,
+        user,
+      };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.isValidationError()) {
+          const allErrors = error.getAllErrors();
+          throw new Error(allErrors[0] || error.message);
+        }
+        throw new Error(error.message);
+      }
+      throw new Error("Failed to update profile. Please try again.");
+    }
   }
 }

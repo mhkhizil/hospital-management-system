@@ -67,3 +67,4 @@ export class User {
     return roles.includes(this.role);
   }
 }
+
