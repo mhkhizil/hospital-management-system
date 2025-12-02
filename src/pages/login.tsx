@@ -1,45 +1,61 @@
-import { useNavigate } from "react-router-dom";
+"use client";
 
-// utils and components ကိုယူသုံး
-import { AuthLayout } from "@/components/layout/auth-layout";
-import { useAuth } from "@/core/presentation/hooks/useAuth";
-import { LoginForm } from "@/components/login/login-form";//ဒီနားရောက်နေပြီ
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/core/presentation/context/AuthContext";
+import { AuthLayout } from "@/components/layout/AuthLayout";
+import { LoginForm } from "@/components/auth/LoginForm";
+
+/**
+ * Login Page Component
+ * Handles user authentication with secure form submission
+ */
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, error: authError } = useAuth();
+  const location = useLocation();
+  const { login, error, isLoading, clearError } = useAuth();
+
+  // Get redirect path from location state
+  const from =
+    (location.state as { from?: { pathname: string } })?.from?.pathname || "/";
 
   const handleSubmit = async (data: { email: string; password: string }) => {
+    // Clear any previous errors
+    clearError();
+
     try {
       await login(data.email, data.password);
-      // Login successful, redirect to dashboard
-      navigate("/");//route ထည့်ရန်
+      // Navigate to the page they were trying to access, or home
+      navigate(from, { replace: true });
     } catch {
-      // Error already handled in auth context
+      // Error is handled by AuthContext and displayed via the error prop
     }
   };
 
   return (
     <AuthLayout>
       <div className="space-y-6">
-        {/*<div>
-          <h2 className="text-2xl font-semibold tracking-tight">
+        {/* Header */}
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
             Welcome back
-          </h2>
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Enter your credentials to sign in to your account
+            Enter your credentials to access your account
           </p>
-        </div>*/}
+        </div>
 
+        {/* Login Form */}
         <LoginForm
           onSubmit={handleSubmit}
-          error={authError || undefined}
-          showForgotPassword={true}
-          forgotPasswordLink="/forgot-password"
+          error={error}
+          isLoading={isLoading}
         />
 
-        {/*<div className="text-center text-sm text-muted-foreground">
-          <p>New users can be registered by administrators</p>
-        </div>*/}
+        {/* Help Text */}
+        <p className="text-center text-xs text-muted-foreground">
+          Contact your administrator if you need access or forgot your
+          credentials.
+        </p>
       </div>
     </AuthLayout>
   );
