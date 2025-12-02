@@ -56,6 +56,20 @@ export const DialogTitle = ({ className, children }: DialogTitleProps) => {
     </h2>
   );
 };
+
+interface DialogDescriptionProps {
+  className?: string;
+  children: React.ReactNode;
+}
+
+export const DialogDescription = ({ className, children }: DialogDescriptionProps) => {
+  return (
+    <p className={cn("text-sm text-muted-foreground", className)}>
+      {children}
+    </p>
+  );
+};
+
 interface DialogFooterProps {
   className?: string;
   children: React.ReactNode;
@@ -73,4 +87,3 @@ export const DialogFooter = ({ className, children }: DialogFooterProps) => {
     </div>
   );
 };
-

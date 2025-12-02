@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Plus, Eye } from "lucide-react";
 import { useState } from "react";
-import PatientEditModal from "@/components/patients/PatientEditModal";//added new page
-import PatientAddModal from "@/components/patients/PatientAddModal";//added new
+import PatientEditModal from "@/components/patients/PatientEditModal";
+import PatientAddModal from "@/components/patients/PatientAddModal";
+import PatientViewModal from "@/components/patients/ViewPatientModal";
 
 export default function PatientsPage() {
   const { patients, loading, searchPatients } = usePatientManagement();
@@ -37,17 +38,16 @@ export default function PatientsPage() {
     console.log("Delete patient:", patientId);
   };
 
-  const handleView = (patientId: string) => {
-    // TODO: Implement view functionality
-    console.log("View patient:", patientId);
-  };
-
   // Edit modal state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
 
   // Add modal state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  
+  // View modal state
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewPatient, setViewPatient] = useState(null);
 
   // Edit Button Function
   const handleEdit = (patient: any) => {
@@ -58,6 +58,12 @@ export default function PatientsPage() {
   // Add Button Function
   const handleRegisterNewPatient = () => {
     setIsAddModalOpen(true);
+  };
+
+  // View Button Function
+  const handleView = (patient: any) => {
+    setViewPatient(patient);
+    setIsViewModalOpen(true);
   };
 
   // Handle adding a new patient
@@ -143,7 +149,7 @@ export default function PatientsPage() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-                        onClick={() => handleView(patient.id)}
+                        onClick={() => handleView(patient)} // Pass the entire patient object
                       >
                         <Eye className="h-4 w-4" />
                         <span className="sr-only">View patient</span>
@@ -177,6 +183,13 @@ export default function PatientsPage() {
             </tbody>
           </table>
           
+          {/* Patient View Modal */}
+          <PatientViewModal
+            open={isViewModalOpen}
+            onClose={() => setIsViewModalOpen(false)}
+            patient={viewPatient}
+          />
+          
           {/* Patient Edit Modal */}
           <PatientEditModal
             open={isEditModalOpen}
@@ -207,5 +220,3 @@ export default function PatientsPage() {
     </div>
   );
 }
-
-
