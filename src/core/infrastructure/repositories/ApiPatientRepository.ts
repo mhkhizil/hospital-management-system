@@ -1,6 +1,7 @@
 import { Patient } from "@/core/domain/entities/Patient";
 import type { IPatientRepository } from "@/core/domain/repositories/IPatientRepository";
 import { HttpClient } from "@/core/infrastructure/api/HttpClient";
+import { API_ENDPOINTS } from "@/core/infrastructure/api/constants";
 
 type PatientResponse = {
   id: string;
@@ -51,7 +52,9 @@ export class ApiPatientRepository implements IPatientRepository {
 
   async fetchAll(): Promise<Patient[]> {
     try {
-      const { data } = await this.http.get<PatientResponse[]>("/patients");
+      const { data } = await this.http.get<PatientResponse[]>(
+        API_ENDPOINTS.PATIENTS.LIST
+      );
       return data.map(
         (item) =>
           new Patient(
@@ -82,5 +85,3 @@ export class ApiPatientRepository implements IPatientRepository {
     );
   }
 }
-
-

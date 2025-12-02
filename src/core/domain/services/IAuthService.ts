@@ -1,37 +1,47 @@
-import { User } from "../entities/User";
+import type { User } from "../entities/User";
+import type {
+  RegisterData,
+  UpdateProfileData,
+  UpdateProfileResult,
+} from "../repositories/IAuthRepository";
 
 /**
- * Interface for authentication service
+ * Auth Service Interface
+ * Defines authentication business operations
  */
 export interface IAuthService {
   /**
-   * Login a user with email and password
+   * Login with email and password
    */
   login(email: string, password: string): Promise<User>;
 
   /**
-   * Register a new user (admin only)
+   * Register a new user (root_user only)
    */
-  register(userData: {
-    name: string;
-    email: string;
-    phone: string;
-    role: "ADMIN" | "STAFF";
-    password: string;
-  }): Promise<User>;
+  register(data: RegisterData): Promise<User>;
 
   /**
-   * Logout the current user
+   * Logout current user
    */
   logout(): Promise<void>;
 
   /**
-   * Get the current authenticated user
+   * Get current authenticated user
    */
   getCurrentUser(): Promise<User | null>;
 
   /**
-   * Check if the user is authenticated
+   * Update current user's profile
    */
-  isAuthenticated(): Promise<boolean>;
+  updateProfile(data: UpdateProfileData): Promise<UpdateProfileResult>;
+
+  /**
+   * Check if user is authenticated
+   */
+  isAuthenticated(): boolean;
+
+  /**
+   * Check if token is expiring soon
+   */
+  isTokenExpiringSoon(minutesThreshold?: number): boolean;
 }

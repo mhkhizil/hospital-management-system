@@ -1,68 +1,70 @@
 /**
- * User entity representing the core domain model for users in the system
- * This is independent of any framework or external concern
+ * User Role Type
+ */
+export type UserRole = "root_user" | "doctor" | "nurse" | "admission";
+
+/**
+ * User Entity
+ * Represents an authenticated user in the system
  */
 export class User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  role: "ADMIN" | "STAFF";
-  profileImageUrl?: string;
-  createdDate?: Date;
-  updatedDate?: Date;
+  constructor(
+    public readonly id: number,
+    public readonly name: string,
+    public readonly email: string,
+    public readonly role: UserRole,
+    public readonly emailVerifiedAt: string | null = null,
+    public readonly createdAt: string | null = null,
+    public readonly updatedAt: string | null = null
+  ) {}
 
-  // Index signature to allow access to properties by string key
-  [key: string]: unknown;
-
-  constructor(data: {
-    id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    role: "ADMIN" | "STAFF";
-    profileImageUrl?: string;
-    createdDate?: Date;
-    updatedDate?: Date;
-  }) {
-    this.id = data.id;
-    this.name = data.name;
-    this.email = data.email;
-    this.phone = data.phone;
-    this.role = data.role;
-    this.profileImageUrl = data.profileImageUrl;
-    this.createdDate = data.createdDate;
-    this.updatedDate = data.updatedDate;
+  /**
+   * Check if user is root user
+   */
+  isRootUser(): boolean {
+    return this.role === "root_user";
   }
 
   /**
-   * Validates that the user entity contains valid data
+   * Check if user is doctor
    */
-  isValid(): boolean {
-    // Basic email regex pattern for domain entity validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    return (
-      !!this.id &&
-      !!this.name &&
-      !!this.email &&
-      emailRegex.test(this.email) &&
-      !!this.role &&
-      ["ADMIN", "STAFF"].includes(this.role)
-    );
+  isDoctor(): boolean {
+    return this.role === "doctor";
   }
 
   /**
-   * Check if user has admin role
+   * Check if user is nurse
    */
-  isAdmin(): boolean {
-    return this.role === "ADMIN";
+  isNurse(): boolean {
+    return this.role === "nurse";
   }
 
   /**
-   * Check if user has staff role
+   * Check if user is admission staff
    */
-  isStaff(): boolean {
-    return this.role === "STAFF";
+  isAdmission(): boolean {
+    return this.role === "admission";
+  }
+
+  /**
+   * Check if email is verified
+   */
+  isEmailVerified(): boolean {
+    return this.emailVerifiedAt !== null;
+  }
+
+  /**
+   * Check if user has a specific role
+   */
+  hasRole(role: UserRole): boolean {
+    return this.role === role;
+  }
+
+  /**
+   * Check if user has any of the specified roles
+   */
+  hasAnyRole(roles: UserRole[]): boolean {
+    return roles.includes(this.role);
   }
 }
+

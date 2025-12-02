@@ -1,6 +1,7 @@
 import { Doctor } from "@/core/domain/entities/Doctor";
 import type { IDoctorRepository } from "@/core/domain/repositories/IDoctorRepository";
 import { HttpClient } from "@/core/infrastructure/api/HttpClient";
+import { API_ENDPOINTS } from "@/core/infrastructure/api/constants";
 
 type DoctorResponse = {
   id: string;
@@ -21,7 +22,9 @@ export class ApiDoctorRepository implements IDoctorRepository {
 
   async fetchAll(): Promise<Doctor[]> {
     try {
-      const { data } = await this.http.get<DoctorResponse[]>("/doctors");
+      const { data } = await this.http.get<DoctorResponse[]>(
+        API_ENDPOINTS.DOCTORS.LIST
+      );
       return data.map(
         (item) =>
           new Doctor(item.id, item.fullName, item.specialty, item.status, item.extension)
@@ -32,5 +35,3 @@ export class ApiDoctorRepository implements IDoctorRepository {
     }
   }
 }
-
-
