@@ -11,20 +11,31 @@ export const Dialog = ({ open, onOpenChange, children }: DialogProps) => {
   return (
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center transition-all",
+        "fixed inset-0 z-[999] flex items-center justify-center transition-all duration-200",
         open ? "visible opacity-100" : "invisible opacity-0"
       )}
     >
+      
       <div
         className="fixed inset-0 bg-black/50"
         onClick={() => onOpenChange(false)}
       />
-      <div className="relative z-50 w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+
+      
+      <div
+        className={cn(
+          "relative z-[1000] bg-white rounded-xl shadow-xl w-full max-w-3xl",
+          "max-h-[90vh] flex flex-col",
+          "overflow-hidden"
+        )}
+      >
         {children}
       </div>
     </div>
   );
 };
+
+
 
 interface DialogContentProps {
   className?: string;
@@ -32,8 +43,19 @@ interface DialogContentProps {
 }
 
 export const DialogContent = ({ className, children }: DialogContentProps) => {
-  return <div className={cn("space-y-4", className)}>{children}</div>;
+  return (
+    <div
+      className={cn(
+        "flex-1 overflow-y-auto scrollbar-hide px-6 py-4",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
 };
+
+
 
 interface DialogHeaderProps {
   className?: string;
@@ -41,8 +63,19 @@ interface DialogHeaderProps {
 }
 
 export const DialogHeader = ({ className, children }: DialogHeaderProps) => {
-  return <div className={cn("space-y-1", className)}>{children}</div>;
+  return (
+    <div
+      className={cn(
+        "sticky top-0 bg-white z-10 border-b px-6 py-4",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
 };
+
+
 
 interface DialogTitleProps {
   className?: string;
@@ -51,24 +84,29 @@ interface DialogTitleProps {
 
 export const DialogTitle = ({ className, children }: DialogTitleProps) => {
   return (
-    <h2 className={cn("text-xl font-semibold leading-none", className)}>
-      {children}
-    </h2>
+    <h2 className={cn("text-xl font-semibold", className)}>{children}</h2>
   );
 };
+
+
 
 interface DialogDescriptionProps {
   className?: string;
   children: React.ReactNode;
 }
 
-export const DialogDescription = ({ className, children }: DialogDescriptionProps) => {
+export const DialogDescription = ({
+  className,
+  children,
+}: DialogDescriptionProps) => {
   return (
     <p className={cn("text-sm text-muted-foreground", className)}>
       {children}
     </p>
   );
 };
+
+
 
 interface DialogFooterProps {
   className?: string;
@@ -79,7 +117,7 @@ export const DialogFooter = ({ className, children }: DialogFooterProps) => {
   return (
     <div
       className={cn(
-        "flex justify-end space-x-2 pt-4 border-t mt-4",
+        "sticky bottom-0 bg-white z-10 border-t px-6 py-4 flex justify-end gap-2",
         className
       )}
     >
