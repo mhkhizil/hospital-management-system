@@ -10,12 +10,19 @@ import UserManagementPage from "@/pages/UserManagement";
 import ProfilePage from "@/pages/Profile";
 import DashboardPage from "@/pages/Dashboard";
 import PatientsPage from "@/pages/Patients";
+import AdmissionsPage from "@/pages/Admissions";
 import AppointmentsPage from "@/pages/Appointments";
 import SettingsPage from "@/pages/Settings";
 
 /**
  * Application Router Configuration
  * Includes authentication protection for all routes
+ * 
+ * Role-based access:
+ * - root_user: Full access to all features
+ * - admission: Patient management, admissions
+ * - doctor: View assigned patients, medical records
+ * - nurse: View assigned patients, nursing care
  */
 export const router = createBrowserRouter([
   // Public routes (only accessible when NOT logged in)
@@ -46,7 +53,22 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <DashboardPage /> },
-      { path: "patients", element: <PatientsPage /> },
+      {
+        path: "patients",
+        element: (
+          <ProtectedRoute allowedRoles={["root_user", "admission", "doctor", "nurse"]}>
+            <PatientsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admissions",
+        element: (
+          <ProtectedRoute allowedRoles={["root_user", "admission", "doctor", "nurse"]}>
+            <AdmissionsPage />
+          </ProtectedRoute>
+        ),
+      },
       { path: "appointments", element: <AppointmentsPage /> },
       {
         path: "users",

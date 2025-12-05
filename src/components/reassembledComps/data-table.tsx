@@ -68,6 +68,8 @@ export interface DataTableProps<T> {
   renderAvatar?: (item: T) => ReactNode;
   renderStatus?: (item: T) => ReactNode;
   renderDate?: (date: Date | string | undefined) => string;
+  // Row customization
+  getRowProps?: (item: T) => { id?: string; className?: string };
 }
 
 export function DataTable<T extends { id: string | number }>({
@@ -91,6 +93,7 @@ export function DataTable<T extends { id: string | number }>({
   renderAvatar,
   renderStatus,
   renderDate,
+  getRowProps,
 }: DataTableProps<T>) {
   const handleSort = (field: string) => {
     if (onSort) {
@@ -186,13 +189,19 @@ export function DataTable<T extends { id: string | number }>({
                 </TableCell>
               </TableRow>
             ) : (
-              data.map((item) => (
-                <TableRow key={item.id}>
-                  {columns.map((column) => (
-                    <TableCell key={column.key} className={column.className}>
-                      {renderCell(item, column)}
-                    </TableCell>
-                  ))}
+              data.map((item) => {
+                const rowProps = getRowProps?.(item) || {};
+                return (
+                  <TableRow 
+                    key={item.id}
+                    id={rowProps.id}
+                    className={rowProps.className}
+                  >
+                    {columns.map((column) => (
+                      <TableCell key={column.key} className={column.className}>
+                        {renderCell(item, column)}
+                      </TableCell>
+                    ))}
                   {hasActions && (
                     <TableCell className="text-right">
                       <DropdownMenu>
@@ -293,7 +302,8 @@ export function DataTable<T extends { id: string | number }>({
                     </TableCell>
                   )}
                 </TableRow>
-              ))
+                );
+              })
             )}
           </TableBody>
         </Table>
@@ -306,11 +316,17 @@ export function DataTable<T extends { id: string | number }>({
             {emptyText}
           </div>
         ) : (
-          data.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-lg border bg-card p-3 sm:p-4 space-y-3"
-            >
+          data.map((item) => {
+            const rowProps = getRowProps?.(item) || {};
+            return (
+              <div
+                key={item.id}
+                id={rowProps.id}
+                className={cn(
+                  "rounded-lg border bg-card p-3 sm:p-4 space-y-3",
+                  rowProps.className
+                )}
+              >
               {/* Mobile card content */}
               <div className="space-y-2.5">
                 {columns.map((column) => {
@@ -393,7 +409,8 @@ export function DataTable<T extends { id: string | number }>({
                 </div>
               )}
             </div>
-          ))
+            );
+          })
         )}
       </div>
 

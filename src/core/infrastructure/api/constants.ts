@@ -48,4 +48,20 @@ export const API_ENDPOINTS = {
     UPDATE: (id: string) => `/api/appointments/${id}`,
     DELETE: (id: string) => `/api/appointments/${id}`,
   },
+  ADMISSIONS: {
+    LIST: "/api/admissions",
+    GET: (id: number | string) => `/api/admissions/${id}`,
+    CREATE: (patientId: number | string) => `/api/patients/${patientId}/admit`,
+    UPDATE: (id: number | string) => `/api/admissions/${id}`,
+    CONVERT_TO_INPATIENT: (id: number | string) =>
+      `/api/admissions/${id}/convert-to-inpatient`,
+    DISCHARGE: (id: number | string) => `/api/admissions/${id}/discharge`,
+    CONFIRM_DEATH: (id: number | string) =>
+      `/api/admissions/${id}/confirm-death`,
+    STATISTICS: "/api/admissions/statistics",
+  },
+  STAFF: {
+    DOCTORS: "/api/staff/doctors",
+    NURSES: "/api/staff/nurses",
+  },
 } as const;

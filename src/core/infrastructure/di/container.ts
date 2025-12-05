@@ -5,11 +5,15 @@ import { ApiDoctorRepository } from "@/core/infrastructure/repositories/ApiDocto
 import { ApiAppointmentRepository } from "@/core/infrastructure/repositories/ApiAppointmentRepository";
 import { ApiAuthRepository } from "@/core/infrastructure/repositories/ApiAuthRepository";
 import { ApiUserRepository } from "@/core/infrastructure/repositories/ApiUserRepository";
+import { ApiAdmissionRepository } from "@/core/infrastructure/repositories/ApiAdmissionRepository";
+import { ApiStaffRepository } from "@/core/infrastructure/repositories/ApiStaffRepository";
 import { PatientManagementService } from "@/core/application/services/PatientManagementService";
 import { DoctorManagementService } from "@/core/application/services/DoctorManagementService";
 import { AppointmentManagementService } from "@/core/application/services/AppointmentManagementService";
 import { AuthManagementService } from "@/core/application/services/AuthManagementService";
 import { UserManagementService } from "@/core/application/services/UserManagementService";
+import { AdmissionManagementService } from "@/core/application/services/AdmissionManagementService";
+import { StaffManagementService } from "@/core/application/services/StaffManagementService";
 
 type Factory<T> = () => T;
 
@@ -61,6 +65,8 @@ export const TOKENS = {
   DOCTOR_REPOSITORY: "DOCTOR_REPOSITORY",
   APPOINTMENT_REPOSITORY: "APPOINTMENT_REPOSITORY",
   USER_REPOSITORY: "USER_REPOSITORY",
+  ADMISSION_REPOSITORY: "ADMISSION_REPOSITORY",
+  STAFF_REPOSITORY: "STAFF_REPOSITORY",
 
   // Application services
   AUTH_SERVICE: "AUTH_SERVICE",
@@ -68,6 +74,8 @@ export const TOKENS = {
   DOCTOR_SERVICE: "DOCTOR_SERVICE",
   APPOINTMENT_SERVICE: "APPOINTMENT_SERVICE",
   USER_SERVICE: "USER_SERVICE",
+  ADMISSION_SERVICE: "ADMISSION_SERVICE",
+  STAFF_SERVICE: "STAFF_SERVICE",
 } as const;
 
 export const container = new Container();
@@ -132,6 +140,26 @@ export function setupContainer() {
   container.register(
     TOKENS.USER_SERVICE,
     () => new UserManagementService(container.resolve(TOKENS.USER_REPOSITORY))
+  );
+
+  // Admission repositories
+  container.register(
+    TOKENS.ADMISSION_REPOSITORY,
+    () => new ApiAdmissionRepository(container.resolve(TOKENS.HTTP_CLIENT))
+  );
+  container.register(
+    TOKENS.STAFF_REPOSITORY,
+    () => new ApiStaffRepository(container.resolve(TOKENS.HTTP_CLIENT))
+  );
+
+  // Admission services
+  container.register(
+    TOKENS.ADMISSION_SERVICE,
+    () => new AdmissionManagementService(container.resolve(TOKENS.ADMISSION_REPOSITORY))
+  );
+  container.register(
+    TOKENS.STAFF_SERVICE,
+    () => new StaffManagementService(container.resolve(TOKENS.STAFF_REPOSITORY))
   );
 }
 
