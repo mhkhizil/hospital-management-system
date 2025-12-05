@@ -22,6 +22,7 @@ import {
   Skull,
   ChevronDown,
   ChevronUp,
+  Eye,
 } from "lucide-react";
 import type { AdmissionDetailDTO } from "@/core/application/dtos/AdmissionDTO";
 
@@ -32,6 +33,7 @@ interface AdmissionDetailProps {
   onDischarge?: () => void;
   onConvertToInpatient?: () => void;
   onConfirmDeath?: () => void;
+  onViewTreatment?: (treatmentId: number) => void;
   canEdit?: boolean;
   canDischarge?: boolean;
 }
@@ -110,9 +112,12 @@ export function AdmissionDetail({
   onDischarge,
   onConvertToInpatient,
   onConfirmDeath,
+  onViewTreatment,
   canEdit = false,
   canDischarge = false,
 }: AdmissionDetailProps) {
+  const [isTreatmentRecordsOpen, setIsTreatmentRecordsOpen] = useState(false);
+  
   const isAdmitted = admission.status === "admitted";
   const isOutpatient = admission.admission_type === "outpatient";
   const canConvert = isAdmitted && isOutpatient && canEdit;
@@ -429,12 +434,28 @@ export function AdmissionDetail({
                         <p className="text-sm text-muted-foreground mb-2">{record.description}</p>
                       )}
                     </div>
-                    <div className="text-xs text-muted-foreground text-right">
-                      {record.treatment_date && (
-                        <div>
-                          {formatDateTime(record.treatment_date, record.treatment_time)}
-                        </div>
+                    <div className="flex items-center gap-3">
+                      {onViewTreatment && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onViewTreatment(record.id);
+                          }}
+                          className="h-7 text-xs"
+                        >
+                          <Eye className="h-3 w-3 mr-1.5" />
+                          Go to Treatment
+                        </Button>
                       )}
+                      <div className="text-xs text-muted-foreground text-right">
+                        {record.treatment_date && (
+                          <div>
+                            {formatDateTime(record.treatment_date, record.treatment_time)}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 

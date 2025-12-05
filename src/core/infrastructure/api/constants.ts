@@ -64,4 +64,18 @@ export const API_ENDPOINTS = {
     DOCTORS: "/api/staff/doctors",
     NURSES: "/api/staff/nurses",
   },
+  TREATMENTS: {
+    LIST: (admissionId: number | string) =>
+      `/api/admissions/${admissionId}/treatments`,
+    GET: (admissionId: number | string, treatmentId: number | string) =>
+      `/api/admissions/${admissionId}/treatments/${treatmentId}`,
+    CREATE: (admissionId: number | string) =>
+      `/api/admissions/${admissionId}/treatments`,
+    UPDATE: (admissionId: number | string, treatmentId: number | string) =>
+      `/api/admissions/${admissionId}/treatments/${treatmentId}`,
+  },
+  TREATMENT_OPTIONS: {
+    TYPES: "/api/treatment-options/types",
+    OUTCOMES: "/api/treatment-options/outcomes",
+  },
 } as const;

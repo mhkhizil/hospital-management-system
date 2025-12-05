@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/core/presentation/hooks/useAuth";
 import { useAdmissionManagement } from "@/core/presentation/hooks/useAdmissionManagement";
 import { usePatientManagement } from "@/core/presentation/hooks/usePatientManagement";
@@ -153,6 +153,7 @@ function PatientSearch({
  * Admissions Page Component
  */
 export default function AdmissionsPage() {
+  const navigate = useNavigate();
   const { hasAnyRole, user } = useAuth();
   const {
     admissions,
@@ -442,6 +443,14 @@ export default function AdmissionsPage() {
   if (viewMode === "create" && !selectedPatient) {
     return (
       <div className="space-y-6 px-2 sm:px-0">
+        {/* Error Message */}
+        {error && (
+          <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 text-destructive">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle>New Admission</CardTitle>
@@ -461,6 +470,14 @@ export default function AdmissionsPage() {
   if (viewMode === "create" && selectedPatient) {
     return (
       <div className="space-y-6 px-2 sm:px-0">
+        {/* Error Message */}
+        {error && (
+          <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 text-destructive">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle>New Admission</CardTitle>
@@ -513,6 +530,9 @@ export default function AdmissionsPage() {
               onDischarge={canDischarge ? () => setViewMode("discharge") : undefined}
               onConvertToInpatient={canUpdate ? () => setViewMode("convert") : undefined}
               onConfirmDeath={canDischarge ? () => setViewMode("death") : undefined}
+              onViewTreatment={(treatmentId) => {
+                navigate(`/treatments?admissionId=${selectedAdmission.id}&treatmentId=${treatmentId}`);
+              }}
               canEdit={canUpdate}
               canDischarge={canDischarge}
             />

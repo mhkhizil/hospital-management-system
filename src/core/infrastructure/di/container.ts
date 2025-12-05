@@ -7,6 +7,7 @@ import { ApiAuthRepository } from "@/core/infrastructure/repositories/ApiAuthRep
 import { ApiUserRepository } from "@/core/infrastructure/repositories/ApiUserRepository";
 import { ApiAdmissionRepository } from "@/core/infrastructure/repositories/ApiAdmissionRepository";
 import { ApiStaffRepository } from "@/core/infrastructure/repositories/ApiStaffRepository";
+import { ApiTreatmentRepository } from "@/core/infrastructure/repositories/ApiTreatmentRepository";
 import { PatientManagementService } from "@/core/application/services/PatientManagementService";
 import { DoctorManagementService } from "@/core/application/services/DoctorManagementService";
 import { AppointmentManagementService } from "@/core/application/services/AppointmentManagementService";
@@ -14,6 +15,7 @@ import { AuthManagementService } from "@/core/application/services/AuthManagemen
 import { UserManagementService } from "@/core/application/services/UserManagementService";
 import { AdmissionManagementService } from "@/core/application/services/AdmissionManagementService";
 import { StaffManagementService } from "@/core/application/services/StaffManagementService";
+import { TreatmentManagementService } from "@/core/application/services/TreatmentManagementService";
 
 type Factory<T> = () => T;
 
@@ -67,6 +69,7 @@ export const TOKENS = {
   USER_REPOSITORY: "USER_REPOSITORY",
   ADMISSION_REPOSITORY: "ADMISSION_REPOSITORY",
   STAFF_REPOSITORY: "STAFF_REPOSITORY",
+  TREATMENT_REPOSITORY: "TREATMENT_REPOSITORY",
 
   // Application services
   AUTH_SERVICE: "AUTH_SERVICE",
@@ -76,6 +79,7 @@ export const TOKENS = {
   USER_SERVICE: "USER_SERVICE",
   ADMISSION_SERVICE: "ADMISSION_SERVICE",
   STAFF_SERVICE: "STAFF_SERVICE",
+  TREATMENT_SERVICE: "TREATMENT_SERVICE",
 } as const;
 
 export const container = new Container();
@@ -160,6 +164,16 @@ export function setupContainer() {
   container.register(
     TOKENS.STAFF_SERVICE,
     () => new StaffManagementService(container.resolve(TOKENS.STAFF_REPOSITORY))
+  );
+
+  // Treatment repositories and services
+  container.register(
+    TOKENS.TREATMENT_REPOSITORY,
+    () => new ApiTreatmentRepository(container.resolve(TOKENS.HTTP_CLIENT))
+  );
+  container.register(
+    TOKENS.TREATMENT_SERVICE,
+    () => new TreatmentManagementService(container.resolve(TOKENS.TREATMENT_REPOSITORY))
   );
 }
 

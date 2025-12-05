@@ -6,6 +6,7 @@ import {
   UserPlus,
   UserCog,
   Activity,
+  Stethoscope,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -20,6 +21,7 @@ export const mainNavigation: NavItem[] = [
   { title: "Overview", to: "/", icon: LayoutDashboard },
   { title: "Patients", to: "/patients", icon: Users },
   { title: "Admissions", to: "/admissions", icon: Activity },
+  { title: "Treatments", to: "/treatments", icon: Stethoscope },
   { title: "Appointments", to: "/appointments", icon: CalendarClock },
   { title: "Users", to: "/users", icon: UserCog, rootOnly: true },
   { title: "Register", to: "/register", icon: UserPlus, rootOnly: true },

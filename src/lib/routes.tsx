@@ -11,6 +11,7 @@ import ProfilePage from "@/pages/Profile";
 import DashboardPage from "@/pages/Dashboard";
 import PatientsPage from "@/pages/Patients";
 import AdmissionsPage from "@/pages/Admissions";
+import TreatmentsPage from "@/pages/Treatments";
 import AppointmentsPage from "@/pages/Appointments";
 import SettingsPage from "@/pages/Settings";
 
@@ -66,6 +67,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["root_user", "admission", "doctor", "nurse"]}>
             <AdmissionsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "treatments",
+        element: (
+          <ProtectedRoute allowedRoles={["root_user", "admission", "doctor", "nurse"]}>
+            <TreatmentsPage />
           </ProtectedRoute>
         ),
       },
