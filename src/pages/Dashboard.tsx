@@ -1,5 +1,6 @@
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { MiniChatBox } from "@/components/chat";
 
 const wards = [
   { name: "General Ward", occupancy: "92%", beds: "46 / 50" },
@@ -74,6 +75,9 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Mini Chat Box */}
+      <MiniChatBox />
     </div>
   );
 }

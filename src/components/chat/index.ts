@@ -1,0 +1,2 @@
+export { MiniChatBox } from "./MiniChatBox";
+
