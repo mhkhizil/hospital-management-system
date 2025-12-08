@@ -11,12 +11,14 @@ import type {
   AdmissionStatus,
   DischargeType,
   DischargeStatus,
-  BillingStatus,
   PatientReference,
   StaffReference,
 } from "@/core/domain/entities/Admission";
 import type { IAdmissionRepository } from "@/core/domain/repositories/IAdmissionRepository";
-import type { PaginatedResponse } from "@/core/domain/entities/Patient";
+import type {
+  PaginatedResponse,
+  BillingStatus,
+} from "@/core/domain/entities/Patient";
 import { HttpClient } from "@/core/infrastructure/api/HttpClient";
 import { API_ENDPOINTS } from "@/core/infrastructure/api/constants";
 
@@ -141,26 +143,32 @@ interface StatisticsApiResponse {
  * Map API response to domain entity
  */
 function mapResponseToAdmission(data: AdmissionResponse): AdmissionWithPatient {
-  const patient: PatientReference | undefined = data.patient ? {
-    id: data.patient.id,
-    name: data.patient.name,
-    nrc_number: data.patient.nrc_number,
-    contact_phone: data.patient.contact_phone,
-    age: data.patient.age,
-    sex: data.patient.sex,
-  } : undefined;
+  const patient: PatientReference | undefined = data.patient
+    ? {
+        id: data.patient.id,
+        name: data.patient.name,
+        nrc_number: data.patient.nrc_number,
+        contact_phone: data.patient.contact_phone,
+        age: data.patient.age,
+        sex: data.patient.sex,
+      }
+    : undefined;
 
-  const doctor: StaffReference | undefined = data.doctor ? {
-    id: data.doctor.id,
-    name: data.doctor.name,
-    email: data.doctor.email,
-  } : undefined;
+  const doctor: StaffReference | undefined = data.doctor
+    ? {
+        id: data.doctor.id,
+        name: data.doctor.name,
+        email: data.doctor.email,
+      }
+    : undefined;
 
-  const nurse: StaffReference | undefined = data.nurse ? {
-    id: data.nurse.id,
-    name: data.nurse.name,
-    email: data.nurse.email,
-  } : undefined;
+  const nurse: StaffReference | undefined = data.nurse
+    ? {
+        id: data.nurse.id,
+        name: data.nurse.name,
+        email: data.nurse.email,
+      }
+    : undefined;
 
   return {
     id: data.id,
@@ -229,16 +237,20 @@ function mapResponseToAdmission(data: AdmissionResponse): AdmissionWithPatient {
       nurse_id: tr.nurse_id,
       created_at: tr.created_at,
       updated_at: tr.updated_at,
-      doctor: tr.doctor ? {
-        id: tr.doctor.id,
-        name: tr.doctor.name,
-        email: tr.doctor.email,
-      } : undefined,
-      nurse: tr.nurse ? {
-        id: tr.nurse.id,
-        name: tr.nurse.name,
-        email: tr.nurse.email,
-      } : undefined,
+      doctor: tr.doctor
+        ? {
+            id: tr.doctor.id,
+            name: tr.doctor.name,
+            email: tr.doctor.email,
+          }
+        : undefined,
+      nurse: tr.nurse
+        ? {
+            id: tr.nurse.id,
+            name: tr.nurse.name,
+            email: tr.nurse.email,
+          }
+        : undefined,
     })),
     treatment_records_count: data.treatment_records_count,
     patient,
@@ -256,7 +268,9 @@ export class ApiAdmissionRepository implements IAdmissionRepository {
   /**
    * Fetch paginated list of admissions
    */
-  async fetchAll(params?: AdmissionListParams): Promise<PaginatedResponse<AdmissionWithPatient>> {
+  async fetchAll(
+    params?: AdmissionListParams
+  ): Promise<PaginatedResponse<AdmissionWithPatient>> {
     const queryParams = new URLSearchParams();
 
     if (params?.patient_id) {
@@ -276,7 +290,7 @@ export class ApiAdmissionRepository implements IAdmissionRepository {
     }
 
     const queryString = queryParams.toString();
-    const url = queryString 
+    const url = queryString
       ? `${API_ENDPOINTS.ADMISSIONS.LIST}?${queryString}`
       : API_ENDPOINTS.ADMISSIONS.LIST;
     const { data } = await this.http.get<ListApiResponse>(url);
@@ -303,7 +317,10 @@ export class ApiAdmissionRepository implements IAdmissionRepository {
   /**
    * Create a new admission for a patient
    */
-  async create(patientId: number, admissionData: CreateAdmissionData): Promise<AdmissionWithPatient> {
+  async create(
+    patientId: number,
+    admissionData: CreateAdmissionData
+  ): Promise<AdmissionWithPatient> {
     const { data } = await this.http.post<SingleApiResponse>(
       API_ENDPOINTS.ADMISSIONS.CREATE(patientId),
       admissionData
@@ -314,7 +331,10 @@ export class ApiAdmissionRepository implements IAdmissionRepository {
   /**
    * Update an existing admission
    */
-  async update(id: number, admissionData: UpdateAdmissionData): Promise<AdmissionWithPatient> {
+  async update(
+    id: number,
+    admissionData: UpdateAdmissionData
+  ): Promise<AdmissionWithPatient> {
     const { data } = await this.http.patch<SingleApiResponse>(
       API_ENDPOINTS.ADMISSIONS.UPDATE(id),
       admissionData
@@ -325,7 +345,10 @@ export class ApiAdmissionRepository implements IAdmissionRepository {
   /**
    * Convert outpatient to inpatient
    */
-  async convertToInpatient(id: number, conversionData: ConvertToInpatientData): Promise<AdmissionWithPatient> {
+  async convertToInpatient(
+    id: number,
+    conversionData: ConvertToInpatientData
+  ): Promise<AdmissionWithPatient> {
     const { data } = await this.http.post<SingleApiResponse>(
       API_ENDPOINTS.ADMISSIONS.CONVERT_TO_INPATIENT(id),
       conversionData
@@ -336,7 +359,10 @@ export class ApiAdmissionRepository implements IAdmissionRepository {
   /**
    * Discharge a patient
    */
-  async discharge(id: number, dischargeData: DischargeData): Promise<AdmissionWithPatient> {
+  async discharge(
+    id: number,
+    dischargeData: DischargeData
+  ): Promise<AdmissionWithPatient> {
     const { data } = await this.http.post<SingleApiResponse>(
       API_ENDPOINTS.ADMISSIONS.DISCHARGE(id),
       dischargeData
@@ -347,7 +373,10 @@ export class ApiAdmissionRepository implements IAdmissionRepository {
   /**
    * Confirm patient death
    */
-  async confirmDeath(id: number, deathData: ConfirmDeathData): Promise<AdmissionWithPatient> {
+  async confirmDeath(
+    id: number,
+    deathData: ConfirmDeathData
+  ): Promise<AdmissionWithPatient> {
     const { data } = await this.http.post<SingleApiResponse>(
       API_ENDPOINTS.ADMISSIONS.CONFIRM_DEATH(id),
       deathData
@@ -365,4 +394,3 @@ export class ApiAdmissionRepository implements IAdmissionRepository {
     return data.data;
   }
 }
-

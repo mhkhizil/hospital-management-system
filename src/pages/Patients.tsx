@@ -24,9 +24,13 @@ import type { PatientManagementService } from "@/core/application/services/Patie
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+
 import { DataTable } from "@/components/reassembledComps/data-table";
-import { getPatientColumns, PatientForm, PatientDetail } from "@/components/patients";
+import {
+  getPatientColumns,
+  PatientForm,
+  PatientDetail,
+} from "@/components/patients";
 import type { PatientListDTO } from "@/core/application/dtos/PatientDTO";
 import type { PatientFormDTO } from "@/core/application/dtos/PatientDTO";
 
@@ -43,8 +47,8 @@ function AccessDenied() {
       </div>
       <h2 className="text-2xl font-bold mb-2">Access Restricted</h2>
       <p className="text-muted-foreground max-w-md">
-        You don't have permission to access the patient management section.
-        This area is restricted to admission staff and administrators.
+        You don't have permission to access the patient management section. This
+        area is restricted to admission staff and administrators.
       </p>
     </div>
   );
@@ -56,7 +60,7 @@ function AccessDenied() {
  */
 export default function PatientsPage() {
   const navigate = useNavigate();
-  const { hasAnyRole, user } = useAuth();
+  const { hasAnyRole } = useAuth();
   const {
     patients,
     searchResults,
@@ -97,12 +101,12 @@ export default function PatientsPage() {
   // UI State
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingPatient, setEditingPatient] = useState<PatientListDTO | null>(null);
+  const [_, setEditingPatient] = useState<PatientListDTO | null>(null);
 
   // Stats totals (independent of pagination and filters)
   const [statsTotals, setStatsTotals] = useState({
     totalPatients: 0,
-    totalAdmitted: 0,       // Patients who have ever been admitted (admissions_count > 0)
+    totalAdmitted: 0, // Patients who have ever been admitted (admissions_count > 0)
     totalNotAdmittedYet: 0, // Patients who have never been admitted (admissions_count === 0)
   });
   const [isLoadingStats, setIsLoadingStats] = useState(false);
@@ -130,25 +134,35 @@ export default function PatientsPage() {
     setIsLoadingStats(true);
     try {
       // Use service directly to fetch totals without affecting main patient list
-      const service = container.resolve<PatientManagementService>(TOKENS.PATIENT_SERVICE);
-      
+      const service = container.resolve<PatientManagementService>(
+        TOKENS.PATIENT_SERVICE
+      );
+
       // Fetch all patients total
-      const allPatientsResult = await service.listPatients({ page: 1, per_page: 1 });
+      const allPatientsResult = await service.listPatients({
+        page: 1,
+        per_page: 1,
+      });
       const totalPatients = allPatientsResult.total;
 
       // Fetch all patients data to count by admissions_count
       // This tells us who has ever been admitted vs who hasn't
       let totalNotAdmittedYet = 0;
-      
+
       if (totalPatients > 0) {
         // Fetch patients in batches to count those with admissions_count === 0
         const batchSize = 100;
         const totalPages = Math.ceil(totalPatients / batchSize);
-        
+
         for (let page = 1; page <= totalPages; page++) {
-          const pageData = await service.listPatients({ page, per_page: batchSize });
+          const pageData = await service.listPatients({
+            page,
+            per_page: batchSize,
+          });
           // Count patients who have never been admitted (admissions_count === 0)
-          totalNotAdmittedYet += pageData.data.filter(p => p.admissions_count === 0).length;
+          totalNotAdmittedYet += pageData.data.filter(
+            (p) => p.admissions_count === 0
+          ).length;
         }
       }
 
@@ -156,8 +170,8 @@ export default function PatientsPage() {
 
       setStatsTotals({
         totalPatients,
-        totalAdmitted,         // Patients who have ever been admitted
-        totalNotAdmittedYet,   // Patients who have never been admitted
+        totalAdmitted, // Patients who have ever been admitted
+        totalNotAdmittedYet, // Patients who have never been admitted
       });
     } catch (error) {
       console.error("Failed to load stats:", error);
@@ -211,14 +225,17 @@ export default function PatientsPage() {
     [getPatient]
   );
 
-  const handleCreatePatient = useCallback(async (data: PatientFormDTO) => {
-    const result = await createPatient(data);
-    if (result) {
-      setViewMode("list");
-      // Refresh stats totals after creating a patient
-      loadStatsTotals();
-    }
-  }, [createPatient, loadStatsTotals]);
+  const handleCreatePatient = useCallback(
+    async (data: PatientFormDTO) => {
+      const result = await createPatient(data);
+      if (result) {
+        setViewMode("list");
+        // Refresh stats totals after creating a patient
+        loadStatsTotals();
+      }
+    },
+    [createPatient, loadStatsTotals]
+  );
 
   const handleUpdatePatient = useCallback(
     async (data: PatientFormDTO) => {
@@ -337,7 +354,9 @@ export default function PatientsPage() {
                     <UserX className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Not Admitted Yet</p>
+                    <p className="text-xs text-muted-foreground">
+                      Not Admitted Yet
+                    </p>
                     <p className="text-xl font-bold">
                       {isLoadingStats ? "-" : statsTotals.totalNotAdmittedYet}
                     </p>
@@ -439,7 +458,8 @@ export default function PatientsPage() {
               {debouncedQuery.length >= 2 && (
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">
-                    Found {searchResults.length} result(s) for "{debouncedQuery}"
+                    Found {searchResults.length} result(s) for "{debouncedQuery}
+                    "
                   </p>
                   <Button
                     variant="ghost"
@@ -511,7 +531,7 @@ export default function PatientsPage() {
               onViewAdmission={(admissionId) => {
                 navigate(`/admissions?admissionId=${admissionId}`);
               }}
-              canRegisterEdit={canRegisterEdit}
+              canEdit={canRegisterEdit}
               isLoadingAdmissions={isLoadingPatient}
             />
           </CardContent>
@@ -547,7 +567,9 @@ export default function PatientsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading patient data...</p>
+            <p className="text-sm text-muted-foreground">
+              Loading patient data...
+            </p>
           </div>
         </div>
       )}

@@ -7,11 +7,8 @@ import type {
   AdmissionStatistics,
   AdmissionListParams,
 } from "../entities/Admission";
-import type { PaginatedResponse } from "../entities/Patient";
-import type {
-  AdmissionListDTO,
-  AdmissionDetailDTO,
-} from "@/core/application/dtos/AdmissionDTO";
+import type { AdmissionDetailDTO } from "@/core/application/dtos/AdmissionDTO";
+import type { PaginatedAdmissionResult } from "@/core/application/services/AdmissionManagementService";
 
 /**
  * Admission Service Interface
@@ -21,7 +18,9 @@ export interface IAdmissionService {
   /**
    * List admissions with pagination
    */
-  listAdmissions(params?: AdmissionListParams): Promise<PaginatedResponse<AdmissionListDTO>>;
+  listAdmissions(
+    params?: AdmissionListParams
+  ): Promise<PaginatedAdmissionResult>;
 
   /**
    * Get admission details by ID
@@ -31,22 +30,34 @@ export interface IAdmissionService {
   /**
    * Create a new admission for a patient
    */
-  createAdmission(patientId: number, data: CreateAdmissionData): Promise<AdmissionDetailDTO>;
+  createAdmission(
+    patientId: number,
+    data: CreateAdmissionData
+  ): Promise<AdmissionDetailDTO>;
 
   /**
    * Update an existing admission
    */
-  updateAdmission(id: number, data: UpdateAdmissionData): Promise<AdmissionDetailDTO>;
+  updateAdmission(
+    id: number,
+    data: UpdateAdmissionData
+  ): Promise<AdmissionDetailDTO>;
 
   /**
    * Convert outpatient to inpatient
    */
-  convertToInpatient(id: number, data: ConvertToInpatientData): Promise<AdmissionDetailDTO>;
+  convertToInpatient(
+    id: number,
+    data: ConvertToInpatientData
+  ): Promise<AdmissionDetailDTO>;
 
   /**
    * Discharge a patient
    */
-  dischargePatient(id: number, data: DischargeData): Promise<AdmissionDetailDTO>;
+  dischargePatient(
+    id: number,
+    data: DischargeData
+  ): Promise<AdmissionDetailDTO>;
 
   /**
    * Confirm patient death
@@ -58,4 +69,3 @@ export interface IAdmissionService {
    */
   getStatistics(): Promise<AdmissionStatistics>;
 }
-

@@ -16,8 +16,6 @@ import type {
 import type {
   AdmissionStatistics,
   AdmissionListParams,
-  AdmissionStatus,
-  AdmissionType,
 } from "@/core/domain/entities/Admission";
 import type { Staff } from "@/core/domain/entities/Staff";
 
@@ -49,7 +47,8 @@ interface AdmissionManagementState {
 export function useAdmissionManagement() {
   // Get services from container
   const admissionService = useMemo(
-    () => container.resolve<AdmissionManagementService>(TOKENS.ADMISSION_SERVICE),
+    () =>
+      container.resolve<AdmissionManagementService>(TOKENS.ADMISSION_SERVICE),
     []
   );
   const staffService = useMemo(
@@ -77,9 +76,12 @@ export function useAdmissionManagement() {
   });
 
   // Helper to update state
-  const updateState = useCallback((updates: Partial<AdmissionManagementState>) => {
-    setState((prev) => ({ ...prev, ...updates }));
-  }, []);
+  const updateState = useCallback(
+    (updates: Partial<AdmissionManagementState>) => {
+      setState((prev) => ({ ...prev, ...updates }));
+    },
+    []
+  );
 
   /**
    * Fetch admissions with pagination and filters
@@ -92,16 +94,14 @@ export function useAdmissionManagement() {
         const result = await admissionService.listAdmissions(params);
         updateState({
           admissions: result.data,
-          currentPage: result.current_page,
-          lastPage: result.last_page,
+          currentPage: result.currentPage,
+          lastPage: result.lastPage,
           total: result.total,
           isLoading: false,
         });
       } catch (err) {
         const message =
-          err instanceof ApiError
-            ? err.message
-            : "Failed to fetch admissions.";
+          err instanceof ApiError ? err.message : "Failed to fetch admissions.";
         updateState({ error: message, isLoading: false });
       }
     },
@@ -117,14 +117,21 @@ export function useAdmissionManagement() {
 
       try {
         const admission = await admissionService.getAdmissionById(id);
-        updateState({ selectedAdmission: admission, isLoadingAdmission: false });
+        updateState({
+          selectedAdmission: admission,
+          isLoadingAdmission: false,
+        });
         return admission;
       } catch (err) {
         const message =
           err instanceof ApiError
             ? err.message
             : "Failed to fetch admission details.";
-        updateState({ error: message, isLoadingAdmission: false, selectedAdmission: null });
+        updateState({
+          error: message,
+          isLoadingAdmission: false,
+          selectedAdmission: null,
+        });
         return null;
       }
     },
@@ -135,7 +142,10 @@ export function useAdmissionManagement() {
    * Create a new admission
    */
   const createAdmission = useCallback(
-    async (patientId: number, data: AdmissionFormDTO): Promise<AdmissionDetailDTO | null> => {
+    async (
+      patientId: number,
+      data: AdmissionFormDTO
+    ): Promise<AdmissionDetailDTO | null> => {
       updateState({ isSubmitting: true, error: null });
 
       try {
@@ -158,7 +168,9 @@ export function useAdmissionManagement() {
           remarks: data.remarks,
         });
         updateState({
-          successMessage: `Patient ${data.admission_type === "outpatient" ? "visit" : "admission"} created successfully.`,
+          successMessage: `Patient ${
+            data.admission_type === "outpatient" ? "visit" : "admission"
+          } created successfully.`,
           isSubmitting: false,
         });
         return admission;
@@ -166,12 +178,18 @@ export function useAdmissionManagement() {
         if (err instanceof ApiError) {
           if (err.isValidationError() && err.errors) {
             const errorMessages = Object.values(err.errors).flat().join(", ");
-            updateState({ error: errorMessages || err.message, isSubmitting: false });
+            updateState({
+              error: errorMessages || err.message,
+              isSubmitting: false,
+            });
           } else {
             updateState({ error: err.message, isSubmitting: false });
           }
         } else {
-          updateState({ error: "Failed to create admission.", isSubmitting: false });
+          updateState({
+            error: "Failed to create admission.",
+            isSubmitting: false,
+          });
         }
         return null;
       }
@@ -183,11 +201,17 @@ export function useAdmissionManagement() {
    * Update an existing admission
    */
   const updateAdmission = useCallback(
-    async (id: number, data: Partial<AdmissionFormDTO>): Promise<AdmissionDetailDTO | null> => {
+    async (
+      id: number,
+      data: Partial<AdmissionFormDTO>
+    ): Promise<AdmissionDetailDTO | null> => {
       updateState({ isSubmitting: true, error: null });
 
       try {
-        const admission = await admissionService.updateAdmission(id, data);
+        const admission = await admissionService.updateAdmission(id, {
+          ...data,
+          police_case: data.police_case as "yes" | "no" | undefined,
+        });
         updateState({
           selectedAdmission: admission,
           successMessage: "Admission updated successfully.",
@@ -198,12 +222,18 @@ export function useAdmissionManagement() {
         if (err instanceof ApiError) {
           if (err.isValidationError() && err.errors) {
             const errorMessages = Object.values(err.errors).flat().join(", ");
-            updateState({ error: errorMessages || err.message, isSubmitting: false });
+            updateState({
+              error: errorMessages || err.message,
+              isSubmitting: false,
+            });
           } else {
             updateState({ error: err.message, isSubmitting: false });
           }
         } else {
-          updateState({ error: "Failed to update admission.", isSubmitting: false });
+          updateState({
+            error: "Failed to update admission.",
+            isSubmitting: false,
+          });
         }
         return null;
       }
@@ -215,7 +245,10 @@ export function useAdmissionManagement() {
    * Convert outpatient to inpatient
    */
   const convertToInpatient = useCallback(
-    async (id: number, data: ConvertToInpatientFormDTO): Promise<AdmissionDetailDTO | null> => {
+    async (
+      id: number,
+      data: ConvertToInpatientFormDTO
+    ): Promise<AdmissionDetailDTO | null> => {
       updateState({ isSubmitting: true, error: null });
 
       try {
@@ -230,7 +263,10 @@ export function useAdmissionManagement() {
         if (err instanceof ApiError) {
           updateState({ error: err.message, isSubmitting: false });
         } else {
-          updateState({ error: "Failed to convert to inpatient.", isSubmitting: false });
+          updateState({
+            error: "Failed to convert to inpatient.",
+            isSubmitting: false,
+          });
         }
         return null;
       }
@@ -242,7 +278,10 @@ export function useAdmissionManagement() {
    * Discharge a patient
    */
   const dischargePatient = useCallback(
-    async (id: number, data: DischargeFormDTO): Promise<AdmissionDetailDTO | null> => {
+    async (
+      id: number,
+      data: DischargeFormDTO
+    ): Promise<AdmissionDetailDTO | null> => {
       updateState({ isSubmitting: true, error: null });
 
       try {
@@ -257,12 +296,18 @@ export function useAdmissionManagement() {
         if (err instanceof ApiError) {
           if (err.isValidationError() && err.errors) {
             const errorMessages = Object.values(err.errors).flat().join(", ");
-            updateState({ error: errorMessages || err.message, isSubmitting: false });
+            updateState({
+              error: errorMessages || err.message,
+              isSubmitting: false,
+            });
           } else {
             updateState({ error: err.message, isSubmitting: false });
           }
         } else {
-          updateState({ error: "Failed to discharge patient.", isSubmitting: false });
+          updateState({
+            error: "Failed to discharge patient.",
+            isSubmitting: false,
+          });
         }
         return null;
       }
@@ -274,7 +319,10 @@ export function useAdmissionManagement() {
    * Confirm patient death
    */
   const confirmDeath = useCallback(
-    async (id: number, data: ConfirmDeathFormDTO): Promise<AdmissionDetailDTO | null> => {
+    async (
+      id: number,
+      data: ConfirmDeathFormDTO
+    ): Promise<AdmissionDetailDTO | null> => {
       updateState({ isSubmitting: true, error: null });
 
       try {
@@ -294,7 +342,10 @@ export function useAdmissionManagement() {
         if (err instanceof ApiError) {
           updateState({ error: err.message, isSubmitting: false });
         } else {
-          updateState({ error: "Failed to confirm death.", isSubmitting: false });
+          updateState({
+            error: "Failed to confirm death.",
+            isSubmitting: false,
+          });
         }
         return null;
       }
@@ -314,9 +365,7 @@ export function useAdmissionManagement() {
       return stats;
     } catch (err) {
       const message =
-        err instanceof ApiError
-          ? err.message
-          : "Failed to fetch statistics.";
+        err instanceof ApiError ? err.message : "Failed to fetch statistics.";
       updateState({ error: message, isLoadingStats: false });
       return null;
     }
@@ -402,4 +451,3 @@ export function useAdmissionManagement() {
     clearSelectedAdmission,
   };
 }
-

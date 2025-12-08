@@ -20,4 +20,3 @@ export interface IStaffService {
    */
   getAllStaff(): Promise<{ doctors: Staff[]; nurses: Staff[] }>;
 }
-

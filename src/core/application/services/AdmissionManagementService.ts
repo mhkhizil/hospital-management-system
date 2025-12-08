@@ -9,13 +9,23 @@ import type {
   AdmissionStatistics,
   AdmissionListParams,
 } from "@/core/domain/entities/Admission";
-import type { PaginatedResponse } from "@/core/domain/entities/Patient";
 import {
   type AdmissionListDTO,
   type AdmissionDetailDTO,
   toAdmissionListDTO,
   toAdmissionDetailDTO,
 } from "@/core/application/dtos/AdmissionDTO";
+
+/**
+ * Paginated admission list result
+ */
+export interface PaginatedAdmissionResult {
+  data: AdmissionListDTO[];
+  currentPage: number;
+  lastPage: number;
+  perPage: number;
+  total: number;
+}
 
 /**
  * Admission Management Service
@@ -27,13 +37,15 @@ export class AdmissionManagementService implements IAdmissionService {
   /**
    * List admissions with pagination
    */
-  async listAdmissions(params?: AdmissionListParams): Promise<PaginatedResponse<AdmissionListDTO>> {
+  async listAdmissions(
+    params?: AdmissionListParams
+  ): Promise<PaginatedAdmissionResult> {
     const result = await this.repository.fetchAll(params);
     return {
       data: result.data.map(toAdmissionListDTO),
-      current_page: result.current_page,
-      last_page: result.last_page,
-      per_page: result.per_page,
+      currentPage: result.current_page,
+      lastPage: result.last_page,
+      perPage: result.per_page,
       total: result.total,
     };
   }
@@ -49,7 +61,10 @@ export class AdmissionManagementService implements IAdmissionService {
   /**
    * Create a new admission for a patient
    */
-  async createAdmission(patientId: number, data: CreateAdmissionData): Promise<AdmissionDetailDTO> {
+  async createAdmission(
+    patientId: number,
+    data: CreateAdmissionData
+  ): Promise<AdmissionDetailDTO> {
     const admission = await this.repository.create(patientId, data);
     return toAdmissionDetailDTO(admission);
   }
@@ -57,7 +72,10 @@ export class AdmissionManagementService implements IAdmissionService {
   /**
    * Update an existing admission
    */
-  async updateAdmission(id: number, data: UpdateAdmissionData): Promise<AdmissionDetailDTO> {
+  async updateAdmission(
+    id: number,
+    data: UpdateAdmissionData
+  ): Promise<AdmissionDetailDTO> {
     const admission = await this.repository.update(id, data);
     return toAdmissionDetailDTO(admission);
   }
@@ -65,7 +83,10 @@ export class AdmissionManagementService implements IAdmissionService {
   /**
    * Convert outpatient to inpatient
    */
-  async convertToInpatient(id: number, data: ConvertToInpatientData): Promise<AdmissionDetailDTO> {
+  async convertToInpatient(
+    id: number,
+    data: ConvertToInpatientData
+  ): Promise<AdmissionDetailDTO> {
     const admission = await this.repository.convertToInpatient(id, data);
     return toAdmissionDetailDTO(admission);
   }
@@ -73,7 +94,10 @@ export class AdmissionManagementService implements IAdmissionService {
   /**
    * Discharge a patient
    */
-  async dischargePatient(id: number, data: DischargeData): Promise<AdmissionDetailDTO> {
+  async dischargePatient(
+    id: number,
+    data: DischargeData
+  ): Promise<AdmissionDetailDTO> {
     const admission = await this.repository.discharge(id, data);
     return toAdmissionDetailDTO(admission);
   }
@@ -81,7 +105,10 @@ export class AdmissionManagementService implements IAdmissionService {
   /**
    * Confirm patient death
    */
-  async confirmDeath(id: number, data: ConfirmDeathData): Promise<AdmissionDetailDTO> {
+  async confirmDeath(
+    id: number,
+    data: ConfirmDeathData
+  ): Promise<AdmissionDetailDTO> {
     const admission = await this.repository.confirmDeath(id, data);
     return toAdmissionDetailDTO(admission);
   }
@@ -93,4 +120,3 @@ export class AdmissionManagementService implements IAdmissionService {
     return this.repository.getStatistics();
   }
 }
-

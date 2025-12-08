@@ -18,7 +18,10 @@ export interface ITreatmentService {
   /**
    * Get treatment record details
    */
-  getTreatmentById(admissionId: number, treatmentId: number): Promise<Treatment>;
+  getTreatmentById(
+    admissionId: number,
+    treatmentId: number
+  ): Promise<Treatment>;
 
   /**
    * Create a new treatment record
@@ -37,4 +40,3 @@ export interface ITreatmentService {
     data: UpdateTreatmentData
   ): Promise<Treatment>;
 }
-

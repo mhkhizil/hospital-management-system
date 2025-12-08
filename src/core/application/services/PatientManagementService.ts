@@ -11,7 +11,7 @@ import {
   toAdmissionDTO,
   fromFormDTO,
 } from "@/core/application/dtos/PatientDTO";
-import type { PatientListParams, PaginatedResponse } from "@/core/domain/entities/Patient";
+import type { PatientListParams } from "@/core/domain/entities/Patient";
 
 /**
  * Paginated patient list result
@@ -42,7 +42,9 @@ export class PatientManagementService {
   /**
    * List patients with pagination and filters
    */
-  async listPatients(params?: PatientListParams): Promise<PaginatedPatientResult> {
+  async listPatients(
+    params?: PatientListParams
+  ): Promise<PaginatedPatientResult> {
     const result = await this.patientRepository.fetchAll(params);
 
     return {
@@ -90,7 +92,10 @@ export class PatientManagementService {
   /**
    * Update an existing patient
    */
-  async updatePatient(id: number, formData: PatientFormDTO): Promise<PatientDetailDTO> {
+  async updatePatient(
+    id: number,
+    formData: PatientFormDTO
+  ): Promise<PatientDetailDTO> {
     const updateData = fromFormDTO(formData);
     const patient = await this.patientRepository.update(id, updateData);
     return toPatientDetailDTO(patient);

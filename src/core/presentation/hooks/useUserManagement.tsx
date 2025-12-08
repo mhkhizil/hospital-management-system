@@ -77,7 +77,11 @@ export function useUserManagement(): UseUserManagementResult {
    * Fetch all deleted users
    */
   const fetchDeletedUsers = useCallback(async () => {
-    setState((prev) => ({ ...prev, isLoadingDeleted: true, deletedError: null }));
+    setState((prev) => ({
+      ...prev,
+      isLoadingDeleted: true,
+      deletedError: null,
+    }));
 
     try {
       const deletedUsers = await userService.listUsers(true);
@@ -88,7 +92,9 @@ export function useUserManagement(): UseUserManagementResult {
       }));
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to fetch deleted users";
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch deleted users";
       setState((prev) => ({
         ...prev,
         isLoadingDeleted: false,

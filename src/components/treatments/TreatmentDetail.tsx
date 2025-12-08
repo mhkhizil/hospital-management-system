@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ArrowLeft,
-  Calendar,
   Clock,
   User,
   Stethoscope,
@@ -59,20 +58,19 @@ function formatTime(timeStr?: string): string | null {
 }
 
 /**
- * Format datetime for display
- */
-function formatDateTime(dateStr?: string, timeStr?: string): string | null {
-  const date = formatDate(dateStr);
-  const time = formatTime(timeStr);
-  if (date && time) return `${date} at ${time}`;
-  return date || time;
-}
-
-/**
  * Get treatment type badge config
  */
-function getTreatmentTypeConfig(type: string): { variant: "default" | "secondary" | "outline" | "destructive"; label: string } {
-  const typeMap: Record<string, { variant: "default" | "secondary" | "outline" | "destructive"; label: string }> = {
+function getTreatmentTypeConfig(type: string): {
+  variant: "default" | "secondary" | "outline" | "destructive";
+  label: string;
+} {
+  const typeMap: Record<
+    string,
+    {
+      variant: "default" | "secondary" | "outline" | "destructive";
+      label: string;
+    }
+  > = {
     surgery: { variant: "destructive", label: "Surgery" },
     medication: { variant: "default", label: "Medication" },
     diagnostic: { variant: "secondary", label: "Diagnostic" },
@@ -94,7 +92,9 @@ function getTreatmentTypeConfig(type: string): { variant: "default" | "secondary
 /**
  * Get outcome badge variant
  */
-function getOutcomeVariant(outcome?: string): "default" | "secondary" | "destructive" | "outline" {
+function getOutcomeVariant(
+  outcome?: string
+): "default" | "secondary" | "destructive" | "outline" {
   switch (outcome) {
     case "successful":
     case "completed":
@@ -127,7 +127,9 @@ function InfoItem({
   return (
     <div className={className}>
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="text-sm font-medium mt-0.5 whitespace-pre-wrap">{value}</dd>
+      <dd className="text-sm font-medium mt-0.5 whitespace-pre-wrap">
+        {value}
+      </dd>
     </div>
   );
 }
@@ -153,7 +155,10 @@ export function TreatmentDetail({
             <div className="flex items-center gap-2 mt-1">
               <Badge variant={typeConfig.variant}>{typeConfig.label}</Badge>
               {treatment.outcome && (
-                <Badge variant={getOutcomeVariant(treatment.outcome)} className="capitalize">
+                <Badge
+                  variant={getOutcomeVariant(treatment.outcome)}
+                  className="capitalize"
+                >
                   {treatment.outcome}
                 </Badge>
               )}
@@ -192,11 +197,21 @@ export function TreatmentDetail({
               />
               <InfoItem label="Treatment Type" value={typeConfig.label} />
               <InfoItem label="Outcome" value={treatment.outcome} />
-              <InfoItem label="Admission ID" value={treatment.admission_id?.toString()} />
-              <InfoItem label="Patient ID" value={treatment.patient_id?.toString()} />
+              <InfoItem
+                label="Admission ID"
+                value={treatment.admission_id?.toString()}
+              />
+              <InfoItem
+                label="Patient ID"
+                value={treatment.patient_id?.toString()}
+              />
             </div>
             {treatment.description && (
-              <InfoItem label="Description" value={treatment.description} className="col-span-2" />
+              <InfoItem
+                label="Description"
+                value={treatment.description}
+                className="col-span-2"
+              />
             )}
           </CardContent>
         </Card>
@@ -218,7 +233,9 @@ export function TreatmentDetail({
                     <p className="font-medium">{treatment.doctor.name}</p>
                     <p className="text-xs text-muted-foreground">Doctor</p>
                     {treatment.doctor.email && (
-                      <p className="text-xs text-muted-foreground mt-1">{treatment.doctor.email}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {treatment.doctor.email}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -230,13 +247,17 @@ export function TreatmentDetail({
                     <p className="font-medium">{treatment.nurse.name}</p>
                     <p className="text-xs text-muted-foreground">Nurse</p>
                     {treatment.nurse.email && (
-                      <p className="text-xs text-muted-foreground mt-1">{treatment.nurse.email}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {treatment.nurse.email}
+                      </p>
                     )}
                   </div>
                 </div>
               )}
               {!treatment.doctor && !treatment.nurse && (
-                <p className="text-sm text-muted-foreground col-span-2">No staff assigned</p>
+                <p className="text-sm text-muted-foreground col-span-2">
+                  No staff assigned
+                </p>
               )}
             </div>
           </CardContent>
@@ -285,8 +306,14 @@ export function TreatmentDetail({
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoItem label="Pre-Procedure Notes" value={treatment.pre_procedure_notes} />
-                <InfoItem label="Post-Procedure Notes" value={treatment.post_procedure_notes} />
+                <InfoItem
+                  label="Pre-Procedure Notes"
+                  value={treatment.pre_procedure_notes}
+                />
+                <InfoItem
+                  label="Post-Procedure Notes"
+                  value={treatment.post_procedure_notes}
+                />
               </div>
             </CardContent>
           </Card>
@@ -341,4 +368,3 @@ export function TreatmentDetail({
     </div>
   );
 }
-

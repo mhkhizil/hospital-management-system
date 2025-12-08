@@ -13,7 +13,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
-import type { AdmissionDetailDTO, AdmissionFormDTO } from "@/core/application/dtos/AdmissionDTO";
+import type {
+  AdmissionDetailDTO,
+  AdmissionFormDTO,
+} from "@/core/application/dtos/AdmissionDTO";
 import type { Staff } from "@/core/domain/entities/Staff";
 
 interface AdmissionEditFormProps {
@@ -58,14 +61,19 @@ export function AdmissionEditForm({
     remarks: admission.remarks || "",
   });
 
-  const [activeSection, setActiveSection] = useState<string>(canEditAdmin ? "admin" : "medical");
+  const [activeSection, setActiveSection] = useState<string>(
+    canEditAdmin ? "admin" : "medical"
+  );
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const isOutpatient = admission.admission_type === "outpatient";
   const isDischarged = admission.status === "discharged";
   const isDeceased = admission.status === "deceased";
 
-  const handleChange = (field: keyof AdmissionFormDTO, value: string | number | undefined) => {
+  const handleChange = (
+    field: keyof AdmissionFormDTO,
+    value: string | number | undefined
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value === "" ? undefined : value,
@@ -325,7 +333,9 @@ export function AdmissionEditForm({
             <Textarea
               id="initial_diagnosis"
               value={formData.initial_diagnosis || ""}
-              onChange={(e) => handleChange("initial_diagnosis", e.target.value)}
+              onChange={(e) =>
+                handleChange("initial_diagnosis", e.target.value)
+              }
               placeholder="Initial diagnosis / assessment"
               className="mt-1.5"
               rows={2}
@@ -338,7 +348,9 @@ export function AdmissionEditForm({
             <Input
               id="drug_allergy_noted"
               value={formData.drug_allergy_noted || ""}
-              onChange={(e) => handleChange("drug_allergy_noted", e.target.value)}
+              onChange={(e) =>
+                handleChange("drug_allergy_noted", e.target.value)
+              }
               placeholder="Known drug allergies"
               className="mt-1.5"
               disabled={isDeceased}
@@ -380,4 +392,3 @@ export function AdmissionEditForm({
     </form>
   );
 }
-

@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
+// import * as React from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, LogOut, User, ChevronDown, UserCircle } from "lucide-react";
+import { Menu, LogOut, User, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/theme/theme-toggle";

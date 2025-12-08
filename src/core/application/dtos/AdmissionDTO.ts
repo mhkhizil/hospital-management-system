@@ -4,8 +4,6 @@ import type {
   AdmissionStatus,
   DischargeType,
   DischargeStatus,
-  PatientReference,
-  StaffReference,
 } from "@/core/domain/entities/Admission";
 
 /**
@@ -198,7 +196,9 @@ export interface ConfirmDeathFormDTO {
 /**
  * Map AdmissionWithPatient to AdmissionListDTO
  */
-export function toAdmissionListDTO(admission: AdmissionWithPatient): AdmissionListDTO {
+export function toAdmissionListDTO(
+  admission: AdmissionWithPatient
+): AdmissionListDTO {
   return {
     id: admission.id,
     admission_number: admission.admission_number,
@@ -210,24 +210,30 @@ export function toAdmissionListDTO(admission: AdmissionWithPatient): AdmissionLi
     ward: admission.ward,
     bed_number: admission.bed_number,
     service: admission.service,
-    patient: admission.patient ? {
-      id: admission.patient.id,
-      name: admission.patient.name,
-      nrc_number: admission.patient.nrc_number,
-      contact_phone: admission.patient.contact_phone,
-      age: admission.patient.age,
-      sex: admission.patient.sex,
-    } : undefined,
-    doctor: admission.doctor ? {
-      id: admission.doctor.id,
-      name: admission.doctor.name,
-      email: admission.doctor.email,
-    } : undefined,
-    nurse: admission.nurse ? {
-      id: admission.nurse.id,
-      name: admission.nurse.name,
-      email: admission.nurse.email,
-    } : undefined,
+    patient: admission.patient
+      ? {
+          id: admission.patient.id,
+          name: admission.patient.name,
+          nrc_number: admission.patient.nrc_number,
+          contact_phone: admission.patient.contact_phone,
+          age: admission.patient.age,
+          sex: admission.patient.sex,
+        }
+      : undefined,
+    doctor: admission.doctor
+      ? {
+          id: admission.doctor.id,
+          name: admission.doctor.name,
+          email: admission.doctor.email,
+        }
+      : undefined,
+    nurse: admission.nurse
+      ? {
+          id: admission.nurse.id,
+          name: admission.nurse.name,
+          email: admission.nurse.email,
+        }
+      : undefined,
     created_at: admission.created_at,
   };
 }
@@ -235,7 +241,9 @@ export function toAdmissionListDTO(admission: AdmissionWithPatient): AdmissionLi
 /**
  * Map AdmissionWithPatient to AdmissionDetailDTO
  */
-export function toAdmissionDetailDTO(admission: AdmissionWithPatient): AdmissionDetailDTO {
+export function toAdmissionDetailDTO(
+  admission: AdmissionWithPatient
+): AdmissionDetailDTO {
   return {
     id: admission.id,
     patient_id: admission.patient_id,
@@ -277,24 +285,30 @@ export function toAdmissionDetailDTO(admission: AdmissionWithPatient): Admission
     attending_doctor_signature: admission.attending_doctor_signature,
     created_at: admission.created_at,
     updated_at: admission.updated_at,
-    patient: admission.patient ? {
-      id: admission.patient.id,
-      name: admission.patient.name,
-      nrc_number: admission.patient.nrc_number,
-      contact_phone: admission.patient.contact_phone,
-      age: admission.patient.age,
-      sex: admission.patient.sex,
-    } : undefined,
-    doctor: admission.doctor ? {
-      id: admission.doctor.id,
-      name: admission.doctor.name,
-      email: admission.doctor.email,
-    } : undefined,
-    nurse: admission.nurse ? {
-      id: admission.nurse.id,
-      name: admission.nurse.name,
-      email: admission.nurse.email,
-    } : undefined,
+    patient: admission.patient
+      ? {
+          id: admission.patient.id,
+          name: admission.patient.name,
+          nrc_number: admission.patient.nrc_number,
+          contact_phone: admission.patient.contact_phone,
+          age: admission.patient.age,
+          sex: admission.patient.sex,
+        }
+      : undefined,
+    doctor: admission.doctor
+      ? {
+          id: admission.doctor.id,
+          name: admission.doctor.name,
+          email: admission.doctor.email,
+        }
+      : undefined,
+    nurse: admission.nurse
+      ? {
+          id: admission.nurse.id,
+          name: admission.nurse.name,
+          email: admission.nurse.email,
+        }
+      : undefined,
     doctor_id: admission.doctor_id,
     nurse_id: admission.nurse_id,
     length_of_stay: admission.length_of_stay,
@@ -321,17 +335,20 @@ export function toAdmissionDetailDTO(admission: AdmissionWithPatient): Admission
       nurse_id: tr.nurse_id,
       created_at: tr.created_at,
       updated_at: tr.updated_at,
-      doctor: tr.doctor ? {
-        id: tr.doctor.id,
-        name: tr.doctor.name,
-        email: tr.doctor.email,
-      } : undefined,
-      nurse: tr.nurse ? {
-        id: tr.nurse.id,
-        name: tr.nurse.name,
-        email: tr.nurse.email,
-      } : undefined,
+      doctor: tr.doctor
+        ? {
+            id: tr.doctor.id,
+            name: tr.doctor.name,
+            email: tr.doctor.email,
+          }
+        : undefined,
+      nurse: tr.nurse
+        ? {
+            id: tr.nurse.id,
+            name: tr.nurse.name,
+            email: tr.nurse.email,
+          }
+        : undefined,
     })),
   };
 }
-

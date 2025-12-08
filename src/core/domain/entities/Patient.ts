@@ -11,12 +11,21 @@ export type BloodType = "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
 /**
  * Marital Status
  */
-export type MaritalStatus = "single" | "married" | "divorced" | "widowed" | "other";
+export type MaritalStatus =
+  | "single"
+  | "married"
+  | "divorced"
+  | "widowed"
+  | "other";
 
 /**
  * Admission Status
  */
-export type AdmissionStatus = "admitted" | "discharged" | "transferred" | "deceased";
+export type AdmissionStatus =
+  | "admitted"
+  | "discharged"
+  | "transferred"
+  | "deceased";
 
 /**
  * Admission Type
@@ -31,7 +40,11 @@ export type BillingStatus = "pending" | "paid" | "partial";
 /**
  * Discharge Type
  */
-export type DischargeType = "normal" | "against_advice" | "absconded" | "transferred";
+export type DischargeType =
+  | "normal"
+  | "against_advice"
+  | "absconded"
+  | "transferred";
 
 /**
  * Discharge Status
@@ -201,7 +214,7 @@ export class Patient {
    * Get current admission if any
    */
   getCurrentAdmission(): Admission | null {
-    return this.admissions.find(a => a.status === "admitted") ?? null;
+    return this.admissions.find((a) => a.status === "admitted") ?? null;
   }
 
   /**
@@ -216,7 +229,10 @@ export class Patient {
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
         age--;
       }
       return `${age} years`;

@@ -36,18 +36,31 @@ import {
   Plus,
   Activity,
   Users,
-  UserCheck,
   Bed,
   Eye,
-  Edit2,
-  LogOut,
   Calendar,
 } from "lucide-react";
-import type { AdmissionListDTO, AdmissionFormDTO, DischargeFormDTO, ConvertToInpatientFormDTO, ConfirmDeathFormDTO } from "@/core/application/dtos/AdmissionDTO";
+import type {
+  AdmissionListDTO,
+  AdmissionFormDTO,
+  DischargeFormDTO,
+  ConvertToInpatientFormDTO,
+  ConfirmDeathFormDTO,
+} from "@/core/application/dtos/AdmissionDTO";
 import type { PatientListDTO } from "@/core/application/dtos/PatientDTO";
-import type { AdmissionStatus, AdmissionType } from "@/core/domain/entities/Admission";
+import type {
+  AdmissionStatus,
+  AdmissionType,
+} from "@/core/domain/entities/Admission";
 
-type ViewMode = "list" | "create" | "view" | "edit" | "discharge" | "convert" | "death";
+type ViewMode =
+  | "list"
+  | "create"
+  | "view"
+  | "edit"
+  | "discharge"
+  | "convert"
+  | "death";
 
 /**
  * Access Denied Component
@@ -76,7 +89,8 @@ function PatientSearch({
   onSelectPatient: (patient: PatientListDTO) => void;
   onCancel: () => void;
 }) {
-  const { searchPatients, searchResults, isSearching, clearSearchResults } = usePatientManagement();
+  const { searchPatients, searchResults, isSearching, clearSearchResults } =
+    usePatientManagement();
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -111,7 +125,9 @@ function PatientSearch({
       </div>
 
       {query.length > 0 && query.length < 2 && (
-        <p className="text-xs text-muted-foreground">Type at least 2 characters to search</p>
+        <p className="text-xs text-muted-foreground">
+          Type at least 2 characters to search
+        </p>
       )}
 
       {searchResults.length > 0 && (
@@ -126,12 +142,20 @@ function PatientSearch({
                 <div>
                   <p className="font-semibold">{patient.name}</p>
                   <div className="flex flex-wrap gap-2 mt-1 text-sm text-muted-foreground">
-                    {patient.nrc_number && <span>NRC: {patient.nrc_number}</span>}
+                    {patient.nrc_number && (
+                      <span>NRC: {patient.nrc_number}</span>
+                    )}
                     {patient.age && <span>Age: {patient.age}</span>}
-                    {patient.sex && <span className="capitalize">{patient.sex}</span>}
+                    {patient.sex && (
+                      <span className="capitalize">{patient.sex}</span>
+                    )}
                   </div>
                 </div>
-                <Badge variant={patient.admissions_count > 0 ? "default" : "secondary"}>
+                <Badge
+                  variant={
+                    patient.admissions_count > 0 ? "default" : "secondary"
+                  }
+                >
                   {patient.admissions_count} admissions
                 </Badge>
               </div>
@@ -154,7 +178,7 @@ function PatientSearch({
  */
 export default function AdmissionsPage() {
   const navigate = useNavigate();
-  const { hasAnyRole, user } = useAuth();
+  const { hasAnyRole } = useAuth();
   const {
     admissions,
     selectedAdmission,
@@ -187,8 +211,6 @@ export default function AdmissionsPage() {
   } = useAdmissionManagement();
 
   // Check user permissions
-  const canViewAll = hasAnyRole(["root_user", "admission"]);
-  const canCreate = hasAnyRole(["root_user", "admission"]);
   const canUpdate = hasAnyRole(["root_user", "admission", "doctor"]);
   const canDischarge = hasAnyRole(["root_user", "doctor"]);
   const canViewStats = hasAnyRole(["root_user", "admission"]);
@@ -199,14 +221,20 @@ export default function AdmissionsPage() {
 
   // UI State
   const [viewMode, setViewMode] = useState<ViewMode>("list");
-  const [selectedPatient, setSelectedPatient] = useState<PatientListDTO | null>(null);
-  const [statusFilter, setStatusFilter] = useState<AdmissionStatus | "all">("all");
+  const [selectedPatient, setSelectedPatient] = useState<PatientListDTO | null>(
+    null
+  );
+  const [statusFilter, setStatusFilter] = useState<AdmissionStatus | "all">(
+    "all"
+  );
   const [typeFilter, setTypeFilter] = useState<AdmissionType | "all">("all");
-  const [highlightedAdmissionId, setHighlightedAdmissionId] = useState<number | null>(null);
+  const [highlightedAdmissionId, setHighlightedAdmissionId] = useState<
+    number | null
+  >(null);
 
   // Fetch initial data
   useEffect(() => {
-    fetchAdmissions({ 
+    fetchAdmissions({
       page: 1,
       status: statusFilter !== "all" ? statusFilter : undefined,
       admission_type: typeFilter !== "all" ? typeFilter : undefined,
@@ -225,12 +253,12 @@ export default function AdmissionsPage() {
         setHighlightedAdmissionId(id);
         // First, ensure we're on the list view to show the highlight
         setViewMode("list");
-        
+
         // Wait for data to load, then show highlight and scroll
         const checkAndHighlight = () => {
           // Check if admission is in the current list
           const admissionInList = admissions.find((a) => a.id === id);
-          
+
           if (admissionInList || !isLoading) {
             // Data is loaded (either found in list or loading finished)
             // Scroll to the admission
@@ -240,7 +268,7 @@ export default function AdmissionsPage() {
                 element.scrollIntoView({ behavior: "smooth", block: "center" });
               }
             }, 100);
-            
+
             // After showing highlight for a bit, fetch and open detail view
             setTimeout(() => {
               getAdmission(id).then((admission) => {
@@ -254,7 +282,7 @@ export default function AdmissionsPage() {
             setTimeout(checkAndHighlight, 100);
           }
         };
-        
+
         // Start checking after a brief delay
         setTimeout(checkAndHighlight, 100);
       }
@@ -263,7 +291,10 @@ export default function AdmissionsPage() {
 
   // Fetch staff when creating/editing
   useEffect(() => {
-    if ((viewMode === "create" || viewMode === "edit") && doctors.length === 0) {
+    if (
+      (viewMode === "create" || viewMode === "edit") &&
+      doctors.length === 0
+    ) {
       fetchStaff();
     }
   }, [viewMode, doctors.length, fetchStaff]);
@@ -303,7 +334,13 @@ export default function AdmissionsPage() {
         if (canViewStats) fetchStatistics();
       }
     },
-    [selectedPatient, createAdmission, fetchAdmissions, fetchStatistics, canViewStats]
+    [
+      selectedPatient,
+      createAdmission,
+      fetchAdmissions,
+      fetchStatistics,
+      canViewStats,
+    ]
   );
 
   const handleUpdateAdmission = useCallback(
@@ -329,7 +366,14 @@ export default function AdmissionsPage() {
       }
       // Error is already set by the hook and will be displayed
     },
-    [selectedAdmission, dischargePatient, fetchAdmissions, currentPage, fetchStatistics, canViewStats]
+    [
+      selectedAdmission,
+      dischargePatient,
+      fetchAdmissions,
+      currentPage,
+      fetchStatistics,
+      canViewStats,
+    ]
   );
 
   const handleConvertToInpatient = useCallback(
@@ -343,7 +387,14 @@ export default function AdmissionsPage() {
       }
       // Error is already set by the hook and will be displayed
     },
-    [selectedAdmission, convertToInpatient, fetchAdmissions, currentPage, fetchStatistics, canViewStats]
+    [
+      selectedAdmission,
+      convertToInpatient,
+      fetchAdmissions,
+      currentPage,
+      fetchStatistics,
+      canViewStats,
+    ]
   );
 
   const handleConfirmDeath = useCallback(
@@ -357,7 +408,14 @@ export default function AdmissionsPage() {
       }
       // Error is already set by the hook and will be displayed
     },
-    [selectedAdmission, confirmDeath, fetchAdmissions, currentPage, fetchStatistics, canViewStats]
+    [
+      selectedAdmission,
+      confirmDeath,
+      fetchAdmissions,
+      currentPage,
+      fetchStatistics,
+      canViewStats,
+    ]
   );
 
   const handleBackToList = useCallback(() => {
@@ -376,7 +434,14 @@ export default function AdmissionsPage() {
       admission_type: typeFilter !== "all" ? typeFilter : undefined,
     });
     if (canViewStats) fetchStatistics();
-  }, [fetchAdmissions, currentPage, statusFilter, typeFilter, fetchStatistics, canViewStats]);
+  }, [
+    fetchAdmissions,
+    currentPage,
+    statusFilter,
+    typeFilter,
+    fetchStatistics,
+    canViewStats,
+  ]);
 
   const handlePageChange = useCallback(
     (page: number) => {
@@ -521,23 +586,41 @@ export default function AdmissionsPage() {
           </div>
         )}
 
-        <Card>
-          <CardContent className="pt-6">
-            <AdmissionDetail
-              admission={selectedAdmission}
-              onClose={handleBackToList}
-              onEdit={canUpdate ? () => setViewMode("edit") : undefined}
-              onDischarge={canDischarge ? () => setViewMode("discharge") : undefined}
-              onConvertToInpatient={canUpdate ? () => setViewMode("convert") : undefined}
-              onConfirmDeath={canDischarge ? () => setViewMode("death") : undefined}
-              onViewTreatment={(treatmentId) => {
-                navigate(`/treatments?admissionId=${selectedAdmission.id}&treatmentId=${treatmentId}`);
-              }}
-              canEdit={canUpdate}
-              canDischarge={canDischarge}
-            />
-          </CardContent>
-        </Card>
+        {isLoadingAdmission ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent className="pt-6">
+              <AdmissionDetail
+                admission={selectedAdmission}
+                onClose={handleBackToList}
+                onEdit={canUpdate ? () => setViewMode("edit") : undefined}
+                onDischarge={
+                  canDischarge ? () => setViewMode("discharge") : undefined
+                }
+                onConvertToInpatient={
+                  canUpdate ? () => setViewMode("convert") : undefined
+                }
+                onConfirmDeath={
+                  canDischarge ? () => setViewMode("death") : undefined
+                }
+                onViewTreatment={(treatmentId) => {
+                  navigate(
+                    `/treatments?admissionId=${selectedAdmission.id}&treatmentId=${treatmentId}`
+                  );
+                }}
+                canEdit={canUpdate}
+                canDischarge={canDischarge}
+              />
+            </CardContent>
+          </Card>
+        )}
       </div>
     );
   }
@@ -676,7 +759,9 @@ export default function AdmissionsPage() {
                     <Activity className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Currently Admitted</p>
+                    <p className="text-xs text-muted-foreground">
+                      Currently Admitted
+                    </p>
                     <p className="text-xl font-bold">
                       {isLoadingStats ? "-" : statistics.currently_admitted}
                     </p>
@@ -693,7 +778,9 @@ export default function AdmissionsPage() {
                   <div>
                     <p className="text-xs text-muted-foreground">Inpatients</p>
                     <p className="text-xl font-bold">
-                      {isLoadingStats ? "-" : statistics.currently_admitted_inpatient}
+                      {isLoadingStats
+                        ? "-"
+                        : statistics.currently_admitted_inpatient}
                     </p>
                   </div>
                 </div>
@@ -708,7 +795,9 @@ export default function AdmissionsPage() {
                   <div>
                     <p className="text-xs text-muted-foreground">Outpatients</p>
                     <p className="text-xl font-bold">
-                      {isLoadingStats ? "-" : statistics.currently_admitted_outpatient}
+                      {isLoadingStats
+                        ? "-"
+                        : statistics.currently_admitted_outpatient}
                     </p>
                   </div>
                 </div>
@@ -758,7 +847,10 @@ export default function AdmissionsPage() {
               </CardTitle>
               <div className="flex flex-wrap gap-2">
                 <RoleGate allowedRoles={["root_user", "admission"]}>
-                  <Button onClick={() => setViewMode("create")} className="w-full sm:w-auto">
+                  <Button
+                    onClick={() => setViewMode("create")}
+                    className="w-full sm:w-auto"
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     New Admission
                   </Button>
@@ -784,7 +876,12 @@ export default function AdmissionsPage() {
               <div className="flex-1 sm:max-w-[200px]">
                 <Select
                   value={statusFilter}
-                  onValueChange={(value) => handleFilterChange(value as AdmissionStatus | "all", typeFilter)}
+                  onValueChange={(value) =>
+                    handleFilterChange(
+                      value as AdmissionStatus | "all",
+                      typeFilter
+                    )
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Filter by status" />
@@ -801,7 +898,12 @@ export default function AdmissionsPage() {
               <div className="flex-1 sm:max-w-[200px]">
                 <Select
                   value={typeFilter}
-                  onValueChange={(value) => handleFilterChange(statusFilter, value as AdmissionType | "all")}
+                  onValueChange={(value) =>
+                    handleFilterChange(
+                      statusFilter,
+                      value as AdmissionType | "all"
+                    )
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Filter by type" />
@@ -833,6 +935,8 @@ export default function AdmissionsPage() {
               actions={actions}
               currentPage={currentPage}
               totalPages={lastPage}
+              totalItems={total}
+              pageSize={15}
               onPageChange={handlePageChange}
               isLoading={isLoading}
               getRowProps={getRowProps}
@@ -843,4 +947,3 @@ export default function AdmissionsPage() {
     </div>
   );
 }
-

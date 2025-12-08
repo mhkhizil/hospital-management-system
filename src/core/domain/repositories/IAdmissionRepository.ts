@@ -1,5 +1,4 @@
 import type {
-  Admission,
   AdmissionWithPatient,
   CreateAdmissionData,
   UpdateAdmissionData,
@@ -19,7 +18,9 @@ export interface IAdmissionRepository {
   /**
    * Fetch paginated list of admissions
    */
-  fetchAll(params?: AdmissionListParams): Promise<PaginatedResponse<AdmissionWithPatient>>;
+  fetchAll(
+    params?: AdmissionListParams
+  ): Promise<PaginatedResponse<AdmissionWithPatient>>;
 
   /**
    * Get admission by ID
@@ -29,7 +30,10 @@ export interface IAdmissionRepository {
   /**
    * Create a new admission for a patient
    */
-  create(patientId: number, data: CreateAdmissionData): Promise<AdmissionWithPatient>;
+  create(
+    patientId: number,
+    data: CreateAdmissionData
+  ): Promise<AdmissionWithPatient>;
 
   /**
    * Update an existing admission
@@ -39,7 +43,10 @@ export interface IAdmissionRepository {
   /**
    * Convert outpatient to inpatient
    */
-  convertToInpatient(id: number, data: ConvertToInpatientData): Promise<AdmissionWithPatient>;
+  convertToInpatient(
+    id: number,
+    data: ConvertToInpatientData
+  ): Promise<AdmissionWithPatient>;
 
   /**
    * Discharge a patient
@@ -49,11 +56,13 @@ export interface IAdmissionRepository {
   /**
    * Confirm patient death
    */
-  confirmDeath(id: number, data: ConfirmDeathData): Promise<AdmissionWithPatient>;
+  confirmDeath(
+    id: number,
+    data: ConfirmDeathData
+  ): Promise<AdmissionWithPatient>;
 
   /**
    * Get admission statistics
    */
   getStatistics(): Promise<AdmissionStatistics>;
 }
-

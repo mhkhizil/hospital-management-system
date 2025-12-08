@@ -9,13 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { DataTable } from "@/components/reassembledComps/data-table";
 import { RoleGate } from "@/core/presentation/components/ProtectedRoute";
 import {
@@ -54,8 +48,8 @@ function AccessDenied() {
       <AlertCircle className="h-12 w-12 text-destructive mb-4" />
       <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
       <p className="text-muted-foreground max-w-md">
-        You don't have permission to access treatment records. Please contact your
-        administrator if you believe this is an error.
+        You don't have permission to access treatment records. Please contact
+        your administrator if you believe this is an error.
       </p>
     </div>
   );
@@ -143,57 +137,61 @@ function AdmissionSearch({
           {searchQuery && filteredAdmissions.length === 0 && (
             <div className="text-center py-4 text-muted-foreground text-sm">
               <p>No admissions found matching "{searchQuery}"</p>
-              <p className="text-xs mt-1">Try a different search term or check other pages</p>
+              <p className="text-xs mt-1">
+                Try a different search term or check other pages
+              </p>
             </div>
           )}
           {filteredAdmissions.length > 0 && (
             <>
               <div className="space-y-2 max-h-[400px] overflow-y-auto">
                 {filteredAdmissions.map((admission) => (
-            <button
-              key={admission.id}
-              onClick={() => onSelectAdmission(admission)}
-              className="w-full p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors text-left"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-sm font-bold">
-                      {admission.admission_number}
-                    </span>
-                    <Badge
-                      variant={
-                        admission.admission_type === "inpatient"
-                          ? "default"
-                          : "outline"
-                      }
-                      className="capitalize"
-                    >
-                      {admission.admission_type}
-                    </Badge>
-                  </div>
-                  {admission.patient && (
-                    <p className="text-sm font-medium mt-1">
-                      {admission.patient.name}
-                    </p>
-                  )}
-                  {admission.admitted_for && (
-                    <p className="text-xs text-muted-foreground mt-1 truncate">
-                      {admission.admitted_for}
-                    </p>
-                  )}
-                </div>
-                <div className="text-xs text-muted-foreground text-right">
-                  {admission.admission_date && (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(admission.admission_date).toLocaleDateString()}
+                  <button
+                    key={admission.id}
+                    onClick={() => onSelectAdmission(admission)}
+                    className="w-full p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors text-left"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-mono text-sm font-bold">
+                            {admission.admission_number}
+                          </span>
+                          <Badge
+                            variant={
+                              admission.admission_type === "inpatient"
+                                ? "default"
+                                : "outline"
+                            }
+                            className="capitalize"
+                          >
+                            {admission.admission_type}
+                          </Badge>
+                        </div>
+                        {admission.patient && (
+                          <p className="text-sm font-medium mt-1">
+                            {admission.patient.name}
+                          </p>
+                        )}
+                        {admission.admitted_for && (
+                          <p className="text-xs text-muted-foreground mt-1 truncate">
+                            {admission.admitted_for}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground text-right">
+                        {admission.admission_date && (
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(
+                              admission.admission_date
+                            ).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
-            </button>
-          ))}
+                  </button>
+                ))}
               </div>
 
               {/* Pagination */}
@@ -226,7 +224,9 @@ function AdmissionSearch({
                         return (
                           <Button
                             key={pageNum}
-                            variant={currentPage === pageNum ? "default" : "outline"}
+                            variant={
+                              currentPage === pageNum ? "default" : "outline"
+                            }
                             size="sm"
                             onClick={() => handlePageChange(pageNum)}
                             disabled={isLoading}
@@ -260,7 +260,7 @@ function AdmissionSearch({
  * Treatments Page Component
  */
 export default function TreatmentsPage() {
-  const { hasAnyRole, user } = useAuth();
+  const { hasAnyRole } = useAuth();
   const {
     treatments,
     selectedTreatment,
@@ -292,9 +292,12 @@ export default function TreatmentsPage() {
 
   // UI State
   const [viewMode, setViewMode] = useState<ViewMode>("select-admission");
-  const [selectedAdmission, setSelectedAdmission] = useState<AdmissionListDTO | null>(null);
-  const [currentAdmissionId, setCurrentAdmissionId] = useState<number | null>(null);
-  const [highlightedTreatmentId, setHighlightedTreatmentId] = useState<number | null>(null);
+  const [currentAdmissionId, setCurrentAdmissionId] = useState<number | null>(
+    null
+  );
+  const [highlightedTreatmentId, setHighlightedTreatmentId] = useState<
+    number | null
+  >(null);
 
   // Role-based permissions
   // View: all roles (filtered by backend)
@@ -311,7 +314,7 @@ export default function TreatmentsPage() {
         setCurrentAdmissionId(id);
         fetchTreatments(id).then(() => {
           setViewMode("list");
-          
+
           // If treatment ID is also provided, highlight and open it
           if (treatmentIdFromUrl) {
             const treatmentId = parseInt(treatmentIdFromUrl, 10);
@@ -324,9 +327,14 @@ export default function TreatmentsPage() {
                     setViewMode("view");
                     // Scroll to the treatment in the list
                     setTimeout(() => {
-                      const element = document.getElementById(`treatment-${treatmentId}`);
+                      const element = document.getElementById(
+                        `treatment-${treatmentId}`
+                      );
                       if (element) {
-                        element.scrollIntoView({ behavior: "smooth", block: "center" });
+                        element.scrollIntoView({
+                          behavior: "smooth",
+                          block: "center",
+                        });
                       }
                     }, 300);
                   }
@@ -341,7 +349,10 @@ export default function TreatmentsPage() {
 
   // Fetch staff when creating/editing
   useEffect(() => {
-    if ((viewMode === "create" || viewMode === "edit") && doctors.length === 0) {
+    if (
+      (viewMode === "create" || viewMode === "edit") &&
+      doctors.length === 0
+    ) {
       fetchStaff();
     }
   }, [viewMode, doctors.length, fetchStaff]);
@@ -364,7 +375,6 @@ export default function TreatmentsPage() {
   // Handlers
   const handleSelectAdmission = useCallback(
     async (admission: AdmissionListDTO) => {
-      setSelectedAdmission(admission);
       setCurrentAdmissionId(admission.id);
       setSearchParams({ admissionId: admission.id.toString() });
       await fetchTreatments(admission.id);
@@ -418,11 +428,15 @@ export default function TreatmentsPage() {
     if (treatmentIdFromUrl) {
       setSearchParams({ admissionId: admissionIdFromUrl || "" });
     }
-  }, [clearSelectedTreatment, treatmentIdFromUrl, admissionIdFromUrl, setSearchParams]);
+  }, [
+    clearSelectedTreatment,
+    treatmentIdFromUrl,
+    admissionIdFromUrl,
+    setSearchParams,
+  ]);
 
   const handleBackToAdmissionSelect = useCallback(() => {
     setViewMode("select-admission");
-    setSelectedAdmission(null);
     setCurrentAdmissionId(null);
     clearTreatments();
     setSearchParams({});
@@ -490,7 +504,9 @@ export default function TreatmentsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Treatment Records</h1>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Treatment Records
+            </h1>
             <p className="text-muted-foreground">
               Manage treatment records for patient admissions
             </p>
@@ -557,16 +573,26 @@ export default function TreatmentsPage() {
           </div>
         )}
 
-        <Card className="bg-card/70 backdrop-blur-sm">
-          <CardContent className="pt-6">
-            <TreatmentDetail
-              treatment={selectedTreatment}
-              onClose={handleBackToList}
-              onEdit={canUpdate ? () => setViewMode("edit") : undefined}
-              canEdit={canUpdate}
-            />
-          </CardContent>
-        </Card>
+        {isLoadingTreatment ? (
+          <Card className="bg-card/70 backdrop-blur-sm">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-card/70 backdrop-blur-sm">
+            <CardContent className="pt-6">
+              <TreatmentDetail
+                treatment={selectedTreatment}
+                onClose={handleBackToList}
+                onEdit={canUpdate ? () => setViewMode("edit") : undefined}
+                canEdit={canUpdate}
+              />
+            </CardContent>
+          </Card>
+        )}
       </div>
     );
   }
@@ -612,7 +638,9 @@ export default function TreatmentsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Treatment Records</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Treatment Records
+          </h1>
           <p className="text-muted-foreground">
             Manage treatment records for patient admissions
           </p>
@@ -677,7 +705,10 @@ export default function TreatmentsPage() {
             </CardTitle>
             <div className="flex items-center gap-2">
               <RoleGate allowedRoles={["root_user", "doctor"]}>
-                <Button onClick={() => setViewMode("create")} className="w-full sm:w-auto">
+                <Button
+                  onClick={() => setViewMode("create")}
+                  className="w-full sm:w-auto"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Treatment
                 </Button>
@@ -687,7 +718,9 @@ export default function TreatmentsPage() {
                 onClick={handleRefresh}
                 disabled={isLoading}
               >
-                <RotateCcw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+                <RotateCcw
+                  className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                />
               </Button>
             </div>
           </div>
@@ -700,7 +733,9 @@ export default function TreatmentsPage() {
           ) : treatments.length === 0 ? (
             <div className="text-center py-12">
               <Activity className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">No treatment records found</p>
+              <p className="text-muted-foreground">
+                No treatment records found
+              </p>
               {canCreate && (
                 <Button
                   variant="outline"
@@ -713,7 +748,7 @@ export default function TreatmentsPage() {
               )}
             </div>
           ) : (
-              <DataTable
+            <DataTable
               data={treatments}
               columns={columns}
               actions={actions}
@@ -726,4 +761,3 @@ export default function TreatmentsPage() {
     </div>
   );
 }
-

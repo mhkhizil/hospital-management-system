@@ -1,10 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { container, TOKENS } from "@/core/infrastructure/di/container";
-import type {
-  PatientManagementService,
-  PaginatedPatientResult,
-  PatientSearchResult,
-} from "@/core/application/services/PatientManagementService";
+import type { PatientManagementService } from "@/core/application/services/PatientManagementService";
 import type {
   PatientListDTO,
   PatientDetailDTO,
@@ -45,7 +41,10 @@ interface UsePatientManagementResult {
   searchPatients: (query: string) => Promise<void>;
   getPatient: (id: number) => Promise<void>;
   createPatient: (data: PatientFormDTO) => Promise<PatientListDTO | null>;
-  updatePatient: (id: number, data: PatientFormDTO) => Promise<PatientDetailDTO | null>;
+  updatePatient: (
+    id: number,
+    data: PatientFormDTO
+  ) => Promise<PatientDetailDTO | null>;
   getAdmissions: (patientId: number) => Promise<void>;
   setPage: (page: number) => void;
   clearError: () => void;
@@ -66,7 +65,8 @@ export function usePatientManagement(): UsePatientManagementResult {
   // Data state
   const [patients, setPatients] = useState<PatientListDTO[]>([]);
   const [searchResults, setSearchResults] = useState<PatientListDTO[]>([]);
-  const [selectedPatient, setSelectedPatient] = useState<PatientDetailDTO | null>(null);
+  const [selectedPatient, setSelectedPatient] =
+    useState<PatientDetailDTO | null>(null);
   const [admissions, setAdmissions] = useState<AdmissionDTO[]>([]);
 
   // Pagination state
@@ -210,7 +210,10 @@ export function usePatientManagement(): UsePatientManagementResult {
    * Update an existing patient
    */
   const updatePatient = useCallback(
-    async (id: number, data: PatientFormDTO): Promise<PatientDetailDTO | null> => {
+    async (
+      id: number,
+      data: PatientFormDTO
+    ): Promise<PatientDetailDTO | null> => {
       setIsSubmitting(true);
       setError(null);
 
@@ -227,7 +230,7 @@ export function usePatientManagement(): UsePatientManagementResult {
         if (err instanceof ApiError) {
           console.error("API Error details:", {
             message: err.message,
-            status: err.statusCode,
+            status: err.status,
             errors: err.errors,
           });
           if (err.isValidationError() && err.errors) {

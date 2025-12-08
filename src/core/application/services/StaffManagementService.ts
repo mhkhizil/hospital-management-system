@@ -30,4 +30,3 @@ export class StaffManagementService implements IStaffService {
     return this.repository.getAllStaff();
   }
 }
-

@@ -59,7 +59,7 @@ export function AdmissionForm({
     bed_number: "",
     medical_officer: "",
     initial_diagnosis: "",
-    drug_allergy_noted: patient.known_allergies || "",
+    drug_allergy_noted: patient.current_admission?.drug_allergy_noted || "",
     remarks: "",
   });
 
@@ -385,7 +385,9 @@ export function AdmissionForm({
             <Textarea
               id="initial_diagnosis"
               value={formData.initial_diagnosis || ""}
-              onChange={(e) => handleChange("initial_diagnosis", e.target.value)}
+              onChange={(e) =>
+                handleChange("initial_diagnosis", e.target.value)
+              }
               placeholder="Initial diagnosis / assessment"
               className="mt-1.5"
               rows={2}
@@ -397,7 +399,9 @@ export function AdmissionForm({
             <Input
               id="drug_allergy_noted"
               value={formData.drug_allergy_noted || ""}
-              onChange={(e) => handleChange("drug_allergy_noted", e.target.value)}
+              onChange={(e) =>
+                handleChange("drug_allergy_noted", e.target.value)
+              }
               placeholder="Known drug allergies (comma-separated)"
               className="mt-1.5"
             />
@@ -438,4 +442,3 @@ export function AdmissionForm({
     </form>
   );
 }
-

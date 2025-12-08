@@ -21,3 +21,4 @@ export interface IStaffRepository {
   getAllStaff(): Promise<{ doctors: Staff[]; nurses: Staff[] }>;
 }
 
+

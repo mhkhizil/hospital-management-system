@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,6 @@ import {
   Send,
   User,
   Clock,
-  ChevronDown,
   ChevronUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -140,11 +139,15 @@ export function MiniChatBox({ className }: MiniChatBoxProps) {
   const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [replyText, setReplyText] = useState("");
-  const [unreadCount, setUnreadCount] = useState(
-    mockMessages.filter((m) => !m.isRead).length
-  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const replyInputRef = useRef<HTMLInputElement>(null);
+
+  // Calculate unread messages and count dynamically
+  const unreadMessages = useMemo(
+    () => messages.filter((m) => !m.isRead),
+    [messages]
+  );
+  const unreadCount = unreadMessages.length;
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -173,7 +176,6 @@ export function MiniChatBox({ className }: MiniChatBoxProps) {
     setMessages((prev) =>
       prev.map((m) => (m.id === message.id ? { ...m, isRead: true } : m))
     );
-    setUnreadCount((prev) => Math.max(0, prev - 1));
   };
 
   const handleReply = (e: React.FormEvent) => {
@@ -195,8 +197,6 @@ export function MiniChatBox({ className }: MiniChatBoxProps) {
     // Show success feedback (in real implementation, this would come from API)
     alert(`Reply sent to ${selectedMessage.senderName}`);
   };
-
-  const unreadMessages = messages.filter((m) => !m.isRead);
 
   if (!isOpen) {
     return (
@@ -364,7 +364,8 @@ export function MiniChatBox({ className }: MiniChatBoxProps) {
                         className={cn(
                           "rounded-lg border p-3 cursor-pointer transition-colors hover:bg-muted/50",
                           !message.isRead && "bg-primary/5 border-primary/20",
-                          selectedMessage?.id === message.id &&
+                          selectedMessage &&
+                            (selectedMessage as Message).id === message.id &&
                             "bg-primary/10 border-primary"
                         )}
                         onClick={() => handleSelectMessage(message)}

@@ -22,13 +22,15 @@ import {
   Stethoscope,
   Bed,
   ClipboardList,
-  Clock,
   ChevronDown,
   ChevronUp,
   DollarSign,
   Eye,
 } from "lucide-react";
-import type { PatientDetailDTO, AdmissionDTO } from "@/core/application/dtos/PatientDTO";
+import type {
+  PatientDetailDTO,
+  AdmissionDTO,
+} from "@/core/application/dtos/PatientDTO";
 
 interface PatientDetailProps {
   patient: PatientDetailDTO;
@@ -52,7 +54,9 @@ function InfoItem({ label, value, icon, className }: InfoItemProps) {
 
   return (
     <div className={`flex items-start gap-3 ${className || ""}`}>
-      {icon && <div className="text-muted-foreground mt-0.5 shrink-0">{icon}</div>}
+      {icon && (
+        <div className="text-muted-foreground mt-0.5 shrink-0">{icon}</div>
+      )}
       <div className="min-w-0 flex-1">
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="text-sm font-medium break-words">{String(value)}</p>
@@ -61,41 +65,52 @@ function InfoItem({ label, value, icon, className }: InfoItemProps) {
   );
 }
 
-function AdmissionCard({ 
-  admission, 
-  formatDate, 
+function AdmissionCard({
+  admission,
+  formatDate,
   formatDateTime,
   onViewAdmission,
-}: { 
-  admission: AdmissionDTO; 
+}: {
+  admission: AdmissionDTO;
   formatDate: (d: string | null | undefined) => string | null;
-  formatDateTime: (d: string | null | undefined, t: string | null | undefined) => string | null;
+  formatDateTime: (
+    d: string | null | undefined,
+    t: string | null | undefined
+  ) => string | null;
   onViewAdmission?: (admissionId: number) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case "admitted": return "default";
-      case "discharged": return "secondary";
-      case "transferred": return "outline";
-      default: return "outline";
+      case "admitted":
+        return "default";
+      case "discharged":
+        return "secondary";
+      case "transferred":
+        return "outline";
+      default:
+        return "outline";
     }
   };
 
   const getBillingBadgeVariant = (status: string | undefined) => {
     switch (status) {
-      case "paid": return "default";
-      case "partial": return "secondary";
-      case "pending": return "destructive";
-      default: return "outline";
+      case "paid":
+        return "default";
+      case "partial":
+        return "secondary";
+      case "pending":
+        return "destructive";
+      default:
+        return "outline";
     }
   };
 
   return (
     <div className="rounded-lg border bg-card">
       {/* Header - Always visible */}
-      <div 
+      <div
         className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
         onClick={() => setExpanded(!expanded)}
       >
@@ -114,7 +129,10 @@ function AdmissionCard({
                 </Badge>
               )}
               {admission.billing_status && (
-                <Badge variant={getBillingBadgeVariant(admission.billing_status)} className="capitalize">
+                <Badge
+                  variant={getBillingBadgeVariant(admission.billing_status)}
+                  className="capitalize"
+                >
                   <DollarSign className="h-3 w-3 mr-1" />
                   {admission.billing_status}
                 </Badge>
@@ -129,7 +147,10 @@ function AdmissionCard({
               {admission.admission_date && (
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  {formatDateTime(admission.admission_date, admission.admission_time)}
+                  {formatDateTime(
+                    admission.admission_date,
+                    admission.admission_time
+                  )}
                 </span>
               )}
               {admission.service && (
@@ -163,7 +184,11 @@ function AdmissionCard({
               </Button>
             )}
             <Button variant="ghost" size="icon" className="shrink-0">
-              {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              {expanded ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </div>
@@ -179,33 +204,57 @@ function AdmissionCard({
               Admission Details
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <InfoItem label="Admission Date" value={formatDateTime(admission.admission_date, admission.admission_time)} />
-              <InfoItem label="Admission Type" value={admission.admission_type} />
+              <InfoItem
+                label="Admission Date"
+                value={formatDateTime(
+                  admission.admission_date,
+                  admission.admission_time
+                )}
+              />
+              <InfoItem
+                label="Admission Type"
+                value={admission.admission_type}
+              />
               <InfoItem label="Service/Department" value={admission.service} />
               <InfoItem label="Ward" value={admission.ward} />
               <InfoItem label="Bed Number" value={admission.bed_number} />
-              <InfoItem label="Present Address" value={admission.present_address} />
+              <InfoItem
+                label="Present Address"
+                value={admission.present_address}
+              />
               <InfoItem label="Referred By" value={admission.referred_by} />
               <InfoItem label="Police Case" value={admission.police_case} />
-              <InfoItem label="Medical Officer" value={admission.medical_officer} />
+              <InfoItem
+                label="Medical Officer"
+                value={admission.medical_officer}
+              />
             </div>
           </div>
 
           {/* Diagnosis */}
-          {(admission.initial_diagnosis || admission.drug_allergy_noted || admission.remarks) && (
+          {(admission.initial_diagnosis ||
+            admission.drug_allergy_noted ||
+            admission.remarks) && (
             <div>
               <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
                 <Stethoscope className="h-4 w-4" />
                 Initial Assessment
               </h4>
               <div className="grid grid-cols-1 gap-4">
-                <InfoItem label="Initial Diagnosis" value={admission.initial_diagnosis} />
+                <InfoItem
+                  label="Initial Diagnosis"
+                  value={admission.initial_diagnosis}
+                />
                 {admission.drug_allergy_noted && (
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
                     <div>
-                      <p className="text-xs text-muted-foreground">Drug Allergy Noted</p>
-                      <p className="text-sm font-medium text-destructive">{admission.drug_allergy_noted}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Drug Allergy Noted
+                      </p>
+                      <p className="text-sm font-medium text-destructive">
+                        {admission.drug_allergy_noted}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -228,9 +277,13 @@ function AdmissionCard({
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Doctor</p>
-                    <p className="text-sm font-medium">{admission.doctor_name}</p>
+                    <p className="text-sm font-medium">
+                      {admission.doctor_name}
+                    </p>
                     {admission.doctor_email && (
-                      <p className="text-xs text-muted-foreground">{admission.doctor_email}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {admission.doctor_email}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -242,15 +295,22 @@ function AdmissionCard({
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Nurse</p>
-                    <p className="text-sm font-medium">{admission.nurse_name}</p>
+                    <p className="text-sm font-medium">
+                      {admission.nurse_name}
+                    </p>
                     {admission.nurse_email && (
-                      <p className="text-xs text-muted-foreground">{admission.nurse_email}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {admission.nurse_email}
+                      </p>
                     )}
                   </div>
                 </div>
               )}
               {admission.attending_doctor_name && (
-                <InfoItem label="Attending Doctor" value={admission.attending_doctor_name} />
+                <InfoItem
+                  label="Attending Doctor"
+                  value={admission.attending_doctor_name}
+                />
               )}
             </div>
           </div>
@@ -263,29 +323,72 @@ function AdmissionCard({
                 Discharge Information
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <InfoItem label="Discharge Date" value={formatDateTime(admission.discharge_date, admission.discharge_time)} />
-                <InfoItem label="Discharge Type" value={admission.discharge_type} />
-                <InfoItem label="Discharge Status" value={admission.discharge_status} />
-                <InfoItem label="Discharge Diagnosis" value={admission.discharge_diagnosis} className="sm:col-span-2 lg:col-span-3" />
+                <InfoItem
+                  label="Discharge Date"
+                  value={formatDateTime(
+                    admission.discharge_date,
+                    admission.discharge_time
+                  )}
+                />
+                <InfoItem
+                  label="Discharge Type"
+                  value={admission.discharge_type}
+                />
+                <InfoItem
+                  label="Discharge Status"
+                  value={admission.discharge_status}
+                />
+                <InfoItem
+                  label="Discharge Diagnosis"
+                  value={admission.discharge_diagnosis}
+                  className="sm:col-span-2 lg:col-span-3"
+                />
                 {admission.other_diagnosis && (
-                  <InfoItem label="Other Diagnosis" value={admission.other_diagnosis} className="sm:col-span-2 lg:col-span-3" />
+                  <InfoItem
+                    label="Other Diagnosis"
+                    value={admission.other_diagnosis}
+                    className="sm:col-span-2 lg:col-span-3"
+                  />
                 )}
                 {admission.external_cause_of_injury && (
-                  <InfoItem label="External Cause of Injury" value={admission.external_cause_of_injury} className="sm:col-span-2 lg:col-span-3" />
+                  <InfoItem
+                    label="External Cause of Injury"
+                    value={admission.external_cause_of_injury}
+                    className="sm:col-span-2 lg:col-span-3"
+                  />
                 )}
                 {admission.clinician_summary && (
-                  <InfoItem label="Clinician Summary" value={admission.clinician_summary} className="sm:col-span-2 lg:col-span-3" />
+                  <InfoItem
+                    label="Clinician Summary"
+                    value={admission.clinician_summary}
+                    className="sm:col-span-2 lg:col-span-3"
+                  />
                 )}
                 {admission.surgical_procedure && (
-                  <InfoItem label="Surgical Procedure" value={admission.surgical_procedure} className="sm:col-span-2 lg:col-span-3" />
+                  <InfoItem
+                    label="Surgical Procedure"
+                    value={admission.surgical_procedure}
+                    className="sm:col-span-2 lg:col-span-3"
+                  />
                 )}
                 {admission.discharge_instructions && (
-                  <InfoItem label="Discharge Instructions" value={admission.discharge_instructions} className="sm:col-span-2 lg:col-span-3" />
+                  <InfoItem
+                    label="Discharge Instructions"
+                    value={admission.discharge_instructions}
+                    className="sm:col-span-2 lg:col-span-3"
+                  />
                 )}
                 {admission.follow_up_instructions && (
-                  <InfoItem label="Follow-up Instructions" value={admission.follow_up_instructions} className="sm:col-span-2 lg:col-span-3" />
+                  <InfoItem
+                    label="Follow-up Instructions"
+                    value={admission.follow_up_instructions}
+                    className="sm:col-span-2 lg:col-span-3"
+                  />
                 )}
-                <InfoItem label="Follow-up Date" value={formatDate(admission.follow_up_date)} />
+                <InfoItem
+                  label="Follow-up Date"
+                  value={formatDate(admission.follow_up_date)}
+                />
               </div>
             </div>
           )}
@@ -293,10 +396,18 @@ function AdmissionCard({
           {/* Death Info (if applicable) */}
           {admission.cause_of_death && (
             <div className="border-t pt-4">
-              <h4 className="text-sm font-semibold mb-3 text-destructive">Death Information</h4>
+              <h4 className="text-sm font-semibold mb-3 text-destructive">
+                Death Information
+              </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <InfoItem label="Cause of Death" value={admission.cause_of_death} />
-                <InfoItem label="Time of Death" value={admission.time_of_death} />
+                <InfoItem
+                  label="Cause of Death"
+                  value={admission.cause_of_death}
+                />
+                <InfoItem
+                  label="Time of Death"
+                  value={admission.time_of_death}
+                />
                 <InfoItem label="Autopsy" value={admission.autopsy} />
                 <InfoItem label="Certified By" value={admission.certified_by} />
                 <InfoItem label="Approved By" value={admission.approved_by} />
@@ -312,9 +423,12 @@ function AdmissionCard({
             {admission.updated_at && (
               <span>Updated: {formatDate(admission.updated_at)}</span>
             )}
-            {admission.treatment_records_count !== undefined && admission.treatment_records_count > 0 && (
-              <span>{admission.treatment_records_count} treatment record(s)</span>
-            )}
+            {admission.treatment_records_count !== undefined &&
+              admission.treatment_records_count > 0 && (
+                <span>
+                  {admission.treatment_records_count} treatment record(s)
+                </span>
+              )}
           </div>
         </div>
       )}
@@ -340,7 +454,10 @@ export function PatientDetail({
     });
   };
 
-  const formatDateTime = (dateStr: string | null | undefined, timeStr: string | null | undefined) => {
+  const formatDateTime = (
+    dateStr: string | null | undefined,
+    timeStr: string | null | undefined
+  ) => {
     if (!dateStr) return null;
     const date = new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
@@ -364,7 +481,8 @@ export function PatientDetail({
   };
 
   // Use admissions from props if available, otherwise from patient
-  const displayAdmissions = admissions.length > 0 ? admissions : patient.admissions;
+  const displayAdmissions =
+    admissions.length > 0 ? admissions : patient.admissions;
 
   return (
     <div className="space-y-6">
@@ -380,7 +498,9 @@ export function PatientDetail({
             </Badge>
           </div>
           {patient.nrc_number && (
-            <p className="text-muted-foreground mt-1">NRC: {patient.nrc_number}</p>
+            <p className="text-muted-foreground mt-1">
+              NRC: {patient.nrc_number}
+            </p>
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -468,7 +588,10 @@ export function PatientDetail({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <InfoItem label="Contact Name" value={patient.nearest_relative_name} />
+            <InfoItem
+              label="Contact Name"
+              value={patient.nearest_relative_name}
+            />
             <InfoItem
               label="Contact Phone"
               value={patient.nearest_relative_phone}
@@ -491,7 +614,9 @@ export function PatientDetail({
               <div className="flex items-start gap-3">
                 <AlertTriangle className="h-4 w-4 text-destructive mt-0.5" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Known Allergies</p>
+                  <p className="text-xs text-muted-foreground">
+                    Known Allergies
+                  </p>
                   <p className="text-sm font-medium text-destructive">
                     {patient.known_allergies}
                   </p>
@@ -505,7 +630,9 @@ export function PatientDetail({
                   <p className="text-xs text-muted-foreground">
                     Chronic Conditions
                   </p>
-                  <p className="text-sm font-medium">{patient.chronic_conditions}</p>
+                  <p className="text-sm font-medium">
+                    {patient.chronic_conditions}
+                  </p>
                 </div>
               </div>
             )}
@@ -534,9 +661,9 @@ export function PatientDetail({
           ) : displayAdmissions.length > 0 ? (
             <div className="space-y-4">
               {displayAdmissions.map((admission) => (
-                <AdmissionCard 
-                  key={admission.id} 
-                  admission={admission} 
+                <AdmissionCard
+                  key={admission.id}
+                  admission={admission}
                   formatDate={formatDate}
                   formatDateTime={formatDateTime}
                   onViewAdmission={onViewAdmission}

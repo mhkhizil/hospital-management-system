@@ -7,6 +7,7 @@ import type {
   AutopsyStatus,
   PoliceCase,
   StaffReference,
+  TreatmentRecord,
 } from "./Patient";
 
 // Re-export types for convenience
@@ -170,4 +171,3 @@ export interface AdmissionListParams {
   per_page?: number;
   page?: number;
 }
-

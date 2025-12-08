@@ -13,6 +13,7 @@ import {
   type BillingStatus,
   type DischargeType,
   type DischargeStatus,
+  type TreatmentRecord,
 } from "@/core/domain/entities/Patient";
 import type {
   IPatientRepository,
@@ -83,7 +84,7 @@ interface AdmissionResponse {
   updated_at?: string;
   deleted_at?: string;
   // Related
-  treatment_records?: unknown[];
+  treatment_records?: TreatmentRecord[];
   treatment_records_count?: number;
   doctor?: StaffResponse;
   nurse?: StaffResponse;
@@ -225,7 +226,7 @@ function mapResponseToPatient(data: PatientResponse): Patient {
   // Handle cases where admissions array might not be included in response (e.g., update endpoint)
   const admissions = data.admissions ?? [];
   const mappedAdmissions = admissions.map(mapAdmissionResponse);
-  
+
   return new Patient(
     data.id,
     data.name,
@@ -249,7 +250,8 @@ function mapResponseToPatient(data: PatientResponse): Patient {
     data.chronic_conditions ?? null,
     data.admissions_count ?? admissions.length,
     mappedAdmissions,
-    data.is_currently_admitted ?? admissions.some((a) => a.status === "admitted"),
+    data.is_currently_admitted ??
+      admissions.some((a) => a.status === "admitted"),
     data.created_at ?? null,
     data.updated_at ?? null
   );
@@ -264,14 +266,19 @@ export class ApiPatientRepository implements IPatientRepository {
   /**
    * Fetch paginated list of patients
    */
-  async fetchAll(params?: PatientListParams): Promise<PaginatedResponse<Patient>> {
+  async fetchAll(
+    params?: PatientListParams
+  ): Promise<PaginatedResponse<Patient>> {
     const queryParams = new URLSearchParams();
 
     if (params?.search) {
       queryParams.append("search", params.search);
     }
     if (params?.currently_admitted !== undefined) {
-      queryParams.append("currently_admitted", String(params.currently_admitted));
+      queryParams.append(
+        "currently_admitted",
+        String(params.currently_admitted)
+      );
     }
     if (params?.per_page) {
       queryParams.append("per_page", String(params.per_page));
@@ -280,7 +287,9 @@ export class ApiPatientRepository implements IPatientRepository {
       queryParams.append("page", String(params.page));
     }
 
-    const url = `${API_ENDPOINTS.PATIENTS.LIST}${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+    const url = `${API_ENDPOINTS.PATIENTS.LIST}${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`;
 
     const { data } = await this.http.get<ListPatientsApiResponse>(url);
 

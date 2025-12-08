@@ -149,3 +149,4 @@ export function getTreatmentColumns(): Column<TreatmentListDTO>[] {
   ];
 }
 
+

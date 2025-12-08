@@ -13,10 +13,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, ArrowLeft, AlertCircle } from "lucide-react";
-import type { TreatmentFormDTO, TreatmentDetailDTO } from "@/core/application/dtos/TreatmentDTO";
+import type {
+  TreatmentFormDTO,
+  TreatmentDetailDTO,
+} from "@/core/application/dtos/TreatmentDTO";
 import type { Staff } from "@/core/domain/entities/Staff";
-import { TREATMENT_TYPES, TREATMENT_OUTCOMES } from "@/core/domain/entities/Treatment";
-import type { TreatmentType, TreatmentOutcome } from "@/core/domain/entities/Treatment";
+import {
+  TREATMENT_TYPES,
+  TREATMENT_OUTCOMES,
+} from "@/core/domain/entities/Treatment";
+import type {
+  TreatmentType,
+  TreatmentOutcome,
+} from "@/core/domain/entities/Treatment";
 
 /**
  * Format date for HTML date input (YYYY-MM-DD)
@@ -161,9 +170,11 @@ export function TreatmentForm({
   ];
 
   // Check if treatment type requires procedure notes
-  const isProcedureType = ["surgery", "procedure", "intervention_therapy"].includes(
-    formData.treatment_type
-  );
+  const isProcedureType = [
+    "surgery",
+    "procedure",
+    "intervention_therapy",
+  ].includes(formData.treatment_type);
 
   // Check if treatment type requires medication fields
   const isMedicationType = [
@@ -238,7 +249,9 @@ export function TreatmentForm({
             </Label>
             <Select
               value={formData.treatment_type}
-              onValueChange={(value) => handleChange("treatment_type", value as TreatmentType)}
+              onValueChange={(value) =>
+                handleChange("treatment_type", value as TreatmentType)
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select type" />
@@ -257,7 +270,9 @@ export function TreatmentForm({
             <Label htmlFor="outcome">Outcome</Label>
             <Select
               value={formData.outcome || ""}
-              onValueChange={(value) => handleChange("outcome", value as TreatmentOutcome)}
+              onValueChange={(value) =>
+                handleChange("outcome", value as TreatmentOutcome)
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select outcome" />
@@ -322,8 +337,9 @@ export function TreatmentForm({
           {!isMedicationType && (
             <div className="md:col-span-2 p-4 bg-muted/50 rounded-lg">
               <p className="text-sm text-muted-foreground">
-                Medication fields are primarily for medication-type treatments, but you can still
-                record any medications administered during this treatment.
+                Medication fields are primarily for medication-type treatments,
+                but you can still record any medications administered during
+                this treatment.
               </p>
             </div>
           )}
@@ -396,8 +412,9 @@ export function TreatmentForm({
           {!isProcedureType && (
             <div className="p-4 bg-muted/50 rounded-lg">
               <p className="text-sm text-muted-foreground">
-                Procedure notes are primarily for surgical/procedural treatments, but you can still
-                record any relevant pre/post notes.
+                Procedure notes are primarily for surgical/procedural
+                treatments, but you can still record any relevant pre/post
+                notes.
               </p>
             </div>
           )}
@@ -407,7 +424,9 @@ export function TreatmentForm({
             <Textarea
               id="pre_procedure_notes"
               value={formData.pre_procedure_notes || ""}
-              onChange={(e) => handleChange("pre_procedure_notes", e.target.value)}
+              onChange={(e) =>
+                handleChange("pre_procedure_notes", e.target.value)
+              }
               placeholder="Notes before the procedure (preparation, consent, vitals, etc.)"
               rows={4}
             />
@@ -418,7 +437,9 @@ export function TreatmentForm({
             <Textarea
               id="post_procedure_notes"
               value={formData.post_procedure_notes || ""}
-              onChange={(e) => handleChange("post_procedure_notes", e.target.value)}
+              onChange={(e) =>
+                handleChange("post_procedure_notes", e.target.value)
+              }
               placeholder="Notes after the procedure (recovery, observations, instructions, etc.)"
               rows={4}
             />
@@ -434,7 +455,10 @@ export function TreatmentForm({
             <Select
               value={formData.doctor_id?.toString() || ""}
               onValueChange={(value) =>
-                handleChange("doctor_id", value ? parseInt(value, 10) : undefined)
+                handleChange(
+                  "doctor_id",
+                  value ? parseInt(value, 10) : undefined
+                )
               }
             >
               <SelectTrigger>
@@ -455,7 +479,10 @@ export function TreatmentForm({
             <Select
               value={formData.nurse_id?.toString() || ""}
               onValueChange={(value) =>
-                handleChange("nurse_id", value ? parseInt(value, 10) : undefined)
+                handleChange(
+                  "nurse_id",
+                  value ? parseInt(value, 10) : undefined
+                )
               }
             >
               <SelectTrigger>
@@ -475,7 +502,12 @@ export function TreatmentForm({
 
       {/* Form Actions */}
       <div className="flex items-center justify-end gap-3 pt-4 border-t">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isLoading}
+        >
           Cancel
         </Button>
         <Button type="submit" disabled={isLoading}>
@@ -486,4 +518,3 @@ export function TreatmentForm({
     </form>
   );
 }
-

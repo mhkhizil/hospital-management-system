@@ -1,8 +1,6 @@
 import type { ITreatmentRepository } from "@/core/domain/repositories/ITreatmentRepository";
 import type { ITreatmentService } from "@/core/domain/services/ITreatmentService";
 import type {
-  TreatmentListResponse,
-  Treatment,
   CreateTreatmentData,
   UpdateTreatmentData,
 } from "@/core/domain/entities/Treatment";
@@ -74,4 +72,3 @@ export class TreatmentManagementService implements ITreatmentService {
     return toTreatmentDetailDTO(treatment);
   }
 }
-

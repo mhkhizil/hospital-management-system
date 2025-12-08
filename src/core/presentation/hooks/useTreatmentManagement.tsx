@@ -9,7 +9,6 @@ import type {
   TreatmentListDTO,
   TreatmentDetailDTO,
   TreatmentFormDTO,
-  TreatmentListResponseDTO,
 } from "@/core/application/dtos/TreatmentDTO";
 import type { Staff } from "@/core/domain/entities/Staff";
 
@@ -43,7 +42,8 @@ interface TreatmentManagementState {
 export function useTreatmentManagement() {
   // Get services from container
   const treatmentService = useMemo(
-    () => container.resolve<TreatmentManagementService>(TOKENS.TREATMENT_SERVICE),
+    () =>
+      container.resolve<TreatmentManagementService>(TOKENS.TREATMENT_SERVICE),
     []
   );
   const staffService = useMemo(
@@ -68,9 +68,12 @@ export function useTreatmentManagement() {
   });
 
   // Helper to update state
-  const updateState = useCallback((updates: Partial<TreatmentManagementState>) => {
-    setState((prev) => ({ ...prev, ...updates }));
-  }, []);
+  const updateState = useCallback(
+    (updates: Partial<TreatmentManagementState>) => {
+      setState((prev) => ({ ...prev, ...updates }));
+    },
+    []
+  );
 
   /**
    * Fetch treatments for an admission
@@ -97,7 +100,10 @@ export function useTreatmentManagement() {
         if (err instanceof ApiError) {
           updateState({ error: err.message, isLoading: false });
         } else {
-          updateState({ error: "Failed to fetch treatments.", isLoading: false });
+          updateState({
+            error: "Failed to fetch treatments.",
+            isLoading: false,
+          });
         }
         return null;
       }
@@ -109,11 +115,17 @@ export function useTreatmentManagement() {
    * Get treatment details
    */
   const getTreatment = useCallback(
-    async (admissionId: number, treatmentId: number): Promise<TreatmentDetailDTO | null> => {
+    async (
+      admissionId: number,
+      treatmentId: number
+    ): Promise<TreatmentDetailDTO | null> => {
       updateState({ isLoadingTreatment: true, error: null });
 
       try {
-        const treatment = await treatmentService.getTreatmentById(admissionId, treatmentId);
+        const treatment = await treatmentService.getTreatmentById(
+          admissionId,
+          treatmentId
+        );
         updateState({
           selectedTreatment: treatment,
           isLoadingTreatment: false,
@@ -123,7 +135,10 @@ export function useTreatmentManagement() {
         if (err instanceof ApiError) {
           updateState({ error: err.message, isLoadingTreatment: false });
         } else {
-          updateState({ error: "Failed to fetch treatment details.", isLoadingTreatment: false });
+          updateState({
+            error: "Failed to fetch treatment details.",
+            isLoadingTreatment: false,
+          });
         }
         return null;
       }
@@ -135,11 +150,17 @@ export function useTreatmentManagement() {
    * Create a new treatment record
    */
   const createTreatment = useCallback(
-    async (admissionId: number, data: TreatmentFormDTO): Promise<TreatmentDetailDTO | null> => {
+    async (
+      admissionId: number,
+      data: TreatmentFormDTO
+    ): Promise<TreatmentDetailDTO | null> => {
       updateState({ isSubmitting: true, error: null });
 
       try {
-        const treatment = await treatmentService.createTreatment(admissionId, data);
+        const treatment = await treatmentService.createTreatment(
+          admissionId,
+          data
+        );
         updateState({
           selectedTreatment: treatment,
           successMessage: "Treatment record created successfully.",
@@ -150,12 +171,18 @@ export function useTreatmentManagement() {
         if (err instanceof ApiError) {
           if (err.isValidationError() && err.errors) {
             const errorMessages = Object.values(err.errors).flat().join(", ");
-            updateState({ error: errorMessages || err.message, isSubmitting: false });
+            updateState({
+              error: errorMessages || err.message,
+              isSubmitting: false,
+            });
           } else {
             updateState({ error: err.message, isSubmitting: false });
           }
         } else {
-          updateState({ error: "Failed to create treatment record.", isSubmitting: false });
+          updateState({
+            error: "Failed to create treatment record.",
+            isSubmitting: false,
+          });
         }
         return null;
       }
@@ -175,7 +202,11 @@ export function useTreatmentManagement() {
       updateState({ isSubmitting: true, error: null });
 
       try {
-        const treatment = await treatmentService.updateTreatment(admissionId, treatmentId, data);
+        const treatment = await treatmentService.updateTreatment(
+          admissionId,
+          treatmentId,
+          data
+        );
         updateState({
           selectedTreatment: treatment,
           successMessage: "Treatment record updated successfully.",
@@ -186,12 +217,18 @@ export function useTreatmentManagement() {
         if (err instanceof ApiError) {
           if (err.isValidationError() && err.errors) {
             const errorMessages = Object.values(err.errors).flat().join(", ");
-            updateState({ error: errorMessages || err.message, isSubmitting: false });
+            updateState({
+              error: errorMessages || err.message,
+              isSubmitting: false,
+            });
           } else {
             updateState({ error: err.message, isSubmitting: false });
           }
         } else {
-          updateState({ error: "Failed to update treatment record.", isSubmitting: false });
+          updateState({
+            error: "Failed to update treatment record.",
+            isSubmitting: false,
+          });
         }
         return null;
       }
@@ -262,4 +299,3 @@ export function useTreatmentManagement() {
     clearTreatments,
   };
 }
-

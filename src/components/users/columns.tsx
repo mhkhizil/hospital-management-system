@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Shield } from "lucide-react";
+// import { Shield } from "lucide-react";
 import type { Column } from "@/components/reassembledComps/data-table";
 import type { User } from "@/core/domain/entities/User";
 import {
@@ -165,6 +165,7 @@ export function getDeletedUserColumns(): Column<User>[] {
     },
   ];
 }
+
 
 
 
