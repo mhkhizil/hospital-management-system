@@ -170,4 +170,3 @@ export const TREATMENT_OUTCOMES: TreatmentOutcomeOption[] = [
 ];
 
 
-

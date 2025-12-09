@@ -3,4 +3,3 @@ export { PatientForm } from "./PatientForm";
 export { PatientDetail } from "./PatientDetail";
 
 
-

@@ -142,4 +142,3 @@ export function getAdmissionColumns(): Column<AdmissionListDTO>[] {
 }
 
 
-
