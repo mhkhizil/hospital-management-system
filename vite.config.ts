@@ -2,6 +2,43 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
 
+const apiBase = process.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+const apiOrigin = (() => {
+  try {
+    return new URL(apiBase).origin;
+  } catch {
+    return apiBase;
+  }
+})();
+
+const connectSources = Array.from(
+  new Set([
+    "'self'",
+    apiOrigin,
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    "https:",
+  ])
+);
+
+const baseCspDirectives = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: https:",
+  "font-src 'self' data:",
+  `connect-src ${connectSources.join(" ")}`,
+  "frame-ancestors 'none'",
+];
+
+const securityHeaders = {
+  "X-Frame-Options": "DENY",
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+  "Content-Security-Policy": `${baseCspDirectives.join("; ")};`,
+};
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -11,38 +48,9 @@ export default defineConfig({
     },
   },
   server: {
-    headers: {
-      // Security headers that can't be set via meta tags
-      "X-Frame-Options": "DENY",
-      "X-Content-Type-Options": "nosniff",
-      "Referrer-Policy": "strict-origin-when-cross-origin",
-      "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
-      // CSP with frame-ancestors (can't be in meta tag)
-      "Content-Security-Policy":
-        "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-        "style-src 'self' 'unsafe-inline'; " +
-        "img-src 'self' data: https:; " +
-        "font-src 'self' data:; " +
-        "connect-src 'self' http://127.0.0.1:8000 http://localhost:8000 https:; " +
-        "frame-ancestors 'none';",
-    },
+    headers: securityHeaders,
   },
   preview: {
-    headers: {
-      // Same headers for production preview
-      "X-Frame-Options": "DENY",
-      "X-Content-Type-Options": "nosniff",
-      "Referrer-Policy": "strict-origin-when-cross-origin",
-      "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
-      "Content-Security-Policy":
-        "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-        "style-src 'self' 'unsafe-inline'; " +
-        "img-src 'self' data: https:; " +
-        "font-src 'self' data:; " +
-        "connect-src 'self' http://127.0.0.1:8000 http://localhost:8000 https:; " +
-        "frame-ancestors 'none';",
-    },
+    headers: securityHeaders,
   },
 });
