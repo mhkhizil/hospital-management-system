@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
 
-const apiBase = process.env.VITE_API_BASE_URL ?? "http://8.222.195.9:8080";
+const apiBase = process.env.VITE_API_BASE_URL ?? "https://api.nationalcancercenter.click/";
 const apiOrigin = (() => {
   try {
     return new URL(apiBase).origin;
@@ -15,7 +15,7 @@ const connectSources = Array.from(
   new Set([
     "'self'",
     apiOrigin,
-    "http://8.222.195.9:8080",
+    "https://api.nationalcancercenter.click/",
     "http://127.0.0.1:8000",
     "http://localhost:8000",
     "https:",
