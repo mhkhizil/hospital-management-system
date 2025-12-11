@@ -31,7 +31,10 @@ export function ConvertToInpatientForm({
 
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const handleChange = (field: keyof ConvertToInpatientFormDTO, value: string) => {
+  const handleChange = (
+    field: keyof ConvertToInpatientFormDTO,
+    value: string
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -69,8 +72,8 @@ export function ConvertToInpatientForm({
       {/* Info Banner */}
       <div className="p-4 bg-amber-500/10 rounded-lg border border-amber-500/20">
         <p className="text-sm text-amber-700 dark:text-amber-300">
-          This outpatient visit will be converted to an inpatient admission. 
-          The patient will be assigned to a ward and bed.
+          This outpatient visit will be converted to an inpatient admission. The
+          patient will be assigned to a ward and bed.
         </p>
       </div>
 
@@ -149,5 +152,3 @@ export function ConvertToInpatientForm({
     </form>
   );
 }
-
-

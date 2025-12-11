@@ -21,7 +21,9 @@ function formatDate(dateStr?: string): string {
 /**
  * Get status badge variant
  */
-function getStatusVariant(status: string): "default" | "secondary" | "destructive" | "outline" {
+function getStatusVariant(
+  status: string
+): "default" | "secondary" | "destructive" | "outline" {
   switch (status) {
     case "admitted":
       return "default";
@@ -60,7 +62,9 @@ export function getAdmissionColumns(): Column<AdmissionListDTO>[] {
       header: "Admission #",
       render: (admission) => (
         <div className="min-w-0">
-          <div className="font-mono text-sm font-medium">{admission.admission_number}</div>
+          <div className="font-mono text-sm font-medium">
+            {admission.admission_number}
+          </div>
           <div className="text-xs text-muted-foreground">
             {formatDate(admission.admission_date)}
           </div>
@@ -72,7 +76,9 @@ export function getAdmissionColumns(): Column<AdmissionListDTO>[] {
       header: "Patient",
       render: (admission) => (
         <div className="min-w-0">
-          <div className="font-semibold truncate">{admission.patient?.name ?? "-"}</div>
+          <div className="font-semibold truncate">
+            {admission.patient?.name ?? "-"}
+          </div>
           {admission.patient?.nrc_number && (
             <div className="text-xs text-muted-foreground truncate">
               {admission.patient.nrc_number}
@@ -85,7 +91,10 @@ export function getAdmissionColumns(): Column<AdmissionListDTO>[] {
       key: "type",
       header: "Type",
       render: (admission) => (
-        <Badge variant={getTypeVariant(admission.admission_type)} className="capitalize">
+        <Badge
+          variant={getTypeVariant(admission.admission_type)}
+          className="capitalize"
+        >
           {admission.admission_type}
         </Badge>
       ),
@@ -110,7 +119,9 @@ export function getAdmissionColumns(): Column<AdmissionListDTO>[] {
             <>
               <div>{admission.ward}</div>
               {admission.bed_number && (
-                <div className="text-xs text-muted-foreground">Bed: {admission.bed_number}</div>
+                <div className="text-xs text-muted-foreground">
+                  Bed: {admission.bed_number}
+                </div>
               )}
             </>
           ) : (
@@ -133,12 +144,13 @@ export function getAdmissionColumns(): Column<AdmissionListDTO>[] {
       key: "status",
       header: "Status",
       render: (admission) => (
-        <Badge variant={getStatusVariant(admission.status)} className="capitalize">
+        <Badge
+          variant={getStatusVariant(admission.status)}
+          className="capitalize"
+        >
           {admission.status}
         </Badge>
       ),
     },
   ];
 }
-
-

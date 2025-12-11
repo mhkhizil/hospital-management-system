@@ -126,8 +126,3 @@ export function RegisterForm({
     />
   );
 }
-
-
-
-
-
