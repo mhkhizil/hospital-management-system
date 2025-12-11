@@ -278,6 +278,7 @@ export default function TreatmentsPage() {
     getTreatment,
     createTreatment,
     updateTreatment,
+    removeAttachment,
     fetchStaff,
     clearError,
     clearSuccess,
@@ -393,9 +394,13 @@ export default function TreatmentsPage() {
   );
 
   const handleCreateTreatment = useCallback(
-    async (data: TreatmentFormDTO) => {
+    async (data: TreatmentFormDTO, attachments?: File[]) => {
       if (!currentAdmissionId) return;
-      const result = await createTreatment(currentAdmissionId, data);
+      const result = await createTreatment(
+        currentAdmissionId,
+        data,
+        attachments
+      );
       if (result) {
         setViewMode("list");
         fetchTreatments(currentAdmissionId);
@@ -405,12 +410,13 @@ export default function TreatmentsPage() {
   );
 
   const handleUpdateTreatment = useCallback(
-    async (data: TreatmentFormDTO) => {
+    async (data: TreatmentFormDTO, attachments?: File[]) => {
       if (!currentAdmissionId || !selectedTreatment) return;
       const result = await updateTreatment(
         currentAdmissionId,
         selectedTreatment.id,
-        data
+        data,
+        attachments
       );
       if (result) {
         setViewMode("view");
@@ -418,6 +424,29 @@ export default function TreatmentsPage() {
       }
     },
     [currentAdmissionId, selectedTreatment, updateTreatment, fetchTreatments]
+  );
+
+  const handleRemoveAttachment = useCallback(
+    async (filename: string) => {
+      if (!currentAdmissionId || !selectedTreatment) return false;
+      const success = await removeAttachment(
+        currentAdmissionId,
+        selectedTreatment.id,
+        filename
+      );
+      if (success) {
+        // Refresh the treatment data to show updated attachments
+        const updatedTreatment = await getTreatment(
+          currentAdmissionId,
+          selectedTreatment.id
+        );
+        if (updatedTreatment) {
+          // The treatment data will be updated in the hook state
+        }
+      }
+      return success;
+    },
+    [currentAdmissionId, selectedTreatment, removeAttachment, getTreatment]
   );
 
   const handleBackToList = useCallback(() => {
@@ -621,6 +650,7 @@ export default function TreatmentsPage() {
                 doctors={doctors}
                 nurses={nurses}
                 onSubmit={handleUpdateTreatment}
+                onRemoveAttachment={handleRemoveAttachment}
                 onCancel={() => setViewMode("view")}
                 isLoading={isSubmitting}
                 isEdit

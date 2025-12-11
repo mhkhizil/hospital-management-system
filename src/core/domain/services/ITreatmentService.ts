@@ -28,7 +28,8 @@ export interface ITreatmentService {
    */
   createTreatment(
     admissionId: number,
-    data: CreateTreatmentData
+    data: CreateTreatmentData,
+    attachments?: File[]
   ): Promise<Treatment>;
 
   /**
@@ -37,6 +38,16 @@ export interface ITreatmentService {
   updateTreatment(
     admissionId: number,
     treatmentId: number,
-    data: UpdateTreatmentData
+    data: UpdateTreatmentData,
+    attachments?: File[]
   ): Promise<Treatment>;
+
+  /**
+   * Remove an attachment from a treatment record
+   */
+  removeAttachment(
+    admissionId: number,
+    treatmentId: number,
+    filename: string
+  ): Promise<void>;
 }

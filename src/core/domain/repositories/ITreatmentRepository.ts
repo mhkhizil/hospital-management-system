@@ -23,7 +23,11 @@ export interface ITreatmentRepository {
   /**
    * Create a new treatment record
    */
-  create(admissionId: number, data: CreateTreatmentData): Promise<Treatment>;
+  create(
+    admissionId: number,
+    data: CreateTreatmentData,
+    attachments?: File[]
+  ): Promise<Treatment>;
 
   /**
    * Update an existing treatment record
@@ -31,8 +35,16 @@ export interface ITreatmentRepository {
   update(
     admissionId: number,
     treatmentId: number,
-    data: UpdateTreatmentData
+    data: UpdateTreatmentData,
+    attachments?: File[]
   ): Promise<Treatment>;
+
+  /**
+   * Remove an attachment from a treatment record
+   */
+  removeAttachment(
+    admissionId: number,
+    treatmentId: number,
+    filename: string
+  ): Promise<void>;
 }
-
-

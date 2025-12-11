@@ -15,6 +15,7 @@ import {
   Activity,
   ClipboardList,
   TestTube,
+  ExternalLink,
 } from "lucide-react";
 import type { TreatmentDetailDTO } from "@/core/application/dtos/TreatmentDTO";
 
@@ -349,6 +350,59 @@ export function TreatmentDetail({
           </Card>
         )}
       </div>
+
+      {/* Attachments Section */}
+      {treatment.attachments && treatment.attachments.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Medical Document Attachments ({treatment.attachments.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {treatment.attachments.map((attachment, index) => {
+                // Find the corresponding URL
+                const attachmentUrl = treatment.attachment_urls?.find(
+                  (url) => url.filename === attachment.filename
+                );
+
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border"
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileText className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="font-medium text-sm">
+                          {attachment.filename}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {(attachment.size / 1024 / 1024).toFixed(2)} MB •{" "}
+                          {formatDate(attachment.uploaded_at)}
+                        </p>
+                      </div>
+                    </div>
+                    {attachmentUrl && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(attachmentUrl.url, "_blank")}
+                        className="flex items-center gap-1"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        View
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Timestamps */}
       <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">

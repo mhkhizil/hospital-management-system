@@ -13,9 +13,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, AlertCircle } from "lucide-react";
+import { AddressSelector } from "@/components/common/AddressSelector";
+import { useAddress } from "@/core/presentation/hooks/useAddress";
+import { useDepartments } from "@/core/presentation/hooks/useDepartments";
+import { useWards } from "@/core/presentation/hooks/useWards";
 import type { AdmissionFormDTO } from "@/core/application/dtos/AdmissionDTO";
 import type { Staff } from "@/core/domain/entities/Staff";
 import type { PatientListDTO } from "@/core/application/dtos/PatientDTO";
+import type { AddressComponents } from "@/core/domain/entities/Address";
 
 interface AdmissionFormProps {
   patient: PatientListDTO;
@@ -44,6 +49,15 @@ export function AdmissionForm({
   onCancel,
   isLoading = false,
 }: AdmissionFormProps) {
+  const { toAddressJSON } = useAddress();
+  const { departmentOptions, isLoading: isLoadingDepartments } =
+    useDepartments();
+  const {
+    wardOptions,
+    getRoomOptionsForWard,
+    isLoading: isLoadingWards,
+  } = useWards();
+
   const [formData, setFormData] = useState<AdmissionFormDTO>({
     admission_type: "inpatient",
     admission_date: new Date().toISOString().split("T")[0],
@@ -65,6 +79,10 @@ export function AdmissionForm({
 
   const [activeSection, setActiveSection] = useState<string>("basic");
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Address state
+  const [addressComponents, setAddressComponents] =
+    useState<AddressComponents | null>(null);
 
   const isOutpatient = formData.admission_type === "outpatient";
 
@@ -90,6 +108,15 @@ export function AdmissionForm({
     setValidationError(null);
   };
 
+  const handleAddressChange = (address: AddressComponents | null) => {
+    setAddressComponents(address);
+    const addressJSON = toAddressJSON(address);
+    setFormData((prev) => ({
+      ...prev,
+      present_address: addressJSON || "",
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError(null);
@@ -101,6 +128,10 @@ export function AdmissionForm({
     }
     if (!formData.admitted_for?.trim()) {
       setValidationError("Reason for admission is required");
+      return;
+    }
+    if (!formData.service?.trim()) {
+      setValidationError("Service/Department is required");
       return;
     }
     if (!isOutpatient && !formData.ward?.trim()) {
@@ -214,14 +245,29 @@ export function AdmissionForm({
           </div>
 
           <div>
-            <Label htmlFor="service">Service / Department</Label>
-            <Input
-              id="service"
+            <Label htmlFor="service">Service / Department *</Label>
+            <Select
               value={formData.service || ""}
-              onChange={(e) => handleChange("service", e.target.value)}
-              placeholder="e.g., Cardiology, Surgery"
-              className="mt-1.5"
-            />
+              onValueChange={(value) => handleChange("service", value)}
+              disabled={isLoadingDepartments}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue
+                  placeholder={
+                    isLoadingDepartments
+                      ? "Loading departments..."
+                      : "Select department"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {departmentOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="md:col-span-2">
@@ -252,38 +298,65 @@ export function AdmissionForm({
             <>
               <div>
                 <Label htmlFor="ward">Ward *</Label>
-                <Input
-                  id="ward"
+                <Select
                   value={formData.ward || ""}
-                  onChange={(e) => handleChange("ward", e.target.value)}
-                  placeholder="e.g., Ward A, ICU"
-                  required={!isOutpatient}
-                  className="mt-1.5"
-                />
+                  onValueChange={(value) => {
+                    handleChange("ward", value);
+                    // Clear bed number when ward changes
+                    handleChange("bed_number", "");
+                  }}
+                  disabled={isLoadingWards}
+                >
+                  <SelectTrigger className="mt-1.5">
+                    <SelectValue
+                      placeholder={
+                        isLoadingWards ? "Loading wards..." : "Select ward"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {wardOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
-                <Label htmlFor="bed_number">Bed Number</Label>
-                <Input
-                  id="bed_number"
+                <Label htmlFor="bed_number">Room Number</Label>
+                <Select
                   value={formData.bed_number || ""}
-                  onChange={(e) => handleChange("bed_number", e.target.value)}
-                  placeholder="e.g., 12, A-15"
-                  className="mt-1.5"
-                />
+                  onValueChange={(value) => handleChange("bed_number", value)}
+                  disabled={!formData.ward || isLoadingWards}
+                >
+                  <SelectTrigger className="mt-1.5">
+                    <SelectValue
+                      placeholder={
+                        formData.ward ? "Select room" : "Select ward first"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {formData.ward
+                      ? getRoomOptionsForWard(formData.ward).map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))
+                      : null}
+                  </SelectContent>
+                </Select>
               </div>
             </>
           )}
 
           <div className="md:col-span-2">
-            <Label htmlFor="present_address">Present Address</Label>
-            <Textarea
-              id="present_address"
-              value={formData.present_address || ""}
-              onChange={(e) => handleChange("present_address", e.target.value)}
-              placeholder="Current address at time of admission"
-              className="mt-1.5"
-              rows={2}
+            <AddressSelector
+              value={addressComponents}
+              onChange={handleAddressChange}
+              label="Present Address"
             />
           </div>
 

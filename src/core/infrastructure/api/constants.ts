@@ -73,9 +73,28 @@ export const API_ENDPOINTS = {
       `/api/admissions/${admissionId}/treatments`,
     UPDATE: (admissionId: number | string, treatmentId: number | string) =>
       `/api/admissions/${admissionId}/treatments/${treatmentId}`,
+    REMOVE_ATTACHMENT: (
+      admissionId: number | string,
+      treatmentId: number | string,
+      filename: string
+    ) =>
+      `/api/admissions/${admissionId}/treatments/${treatmentId}/attachments/${filename}`,
   },
   TREATMENT_OPTIONS: {
     TYPES: "/api/treatment-options/types",
     OUTCOMES: "/api/treatment-options/outcomes",
+  },
+  ADDRESSES: {
+    MYANMAR: "/api/addresses/myanmar",
+  },
+  NRC: {
+    CODES: "/api/nrc-codes",
+  },
+  DEPARTMENTS: {
+    LIST: "/api/departments",
+  },
+  WARDS: {
+    LIST: "/api/wards",
+    ROOMS: (wardKey: string) => `/api/wards/${wardKey}/rooms`,
   },
 } as const;

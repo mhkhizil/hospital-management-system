@@ -24,6 +24,7 @@ import {
   ChevronUp,
   Eye,
 } from "lucide-react";
+import { useAddress } from "@/core/presentation/hooks/useAddress";
 import type { AdmissionDetailDTO } from "@/core/application/dtos/AdmissionDTO";
 
 interface AdmissionDetailProps {
@@ -118,6 +119,7 @@ export function AdmissionDetail({
   canEdit = false,
   canDischarge = false,
 }: AdmissionDetailProps) {
+  const { formatAddressForDisplay } = useAddress();
   const [isTreatmentRecordsOpen, setIsTreatmentRecordsOpen] = useState(false);
 
   const isAdmitted = admission.status === "admitted";
@@ -277,7 +279,7 @@ export function AdmissionDetail({
             {admission.present_address && (
               <InfoItem
                 label="Present Address"
-                value={admission.present_address}
+                value={formatAddressForDisplay(admission.present_address)}
               />
             )}
           </CardContent>
