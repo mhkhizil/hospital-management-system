@@ -96,13 +96,10 @@ export function getSearchResultColumns(): Column<PatientListDTO>[] {
       key: "status",
       header: "Status",
       render: (patient) => (
-        <Badge
-          variant={patient.admissions_count > 0 ? "default" : "outline"}
-        >
+        <Badge variant={patient.admissions_count > 0 ? "default" : "outline"}>
           {patient.admissions_count > 0 ? "Admitted" : "Not Admitted Yet"}
         </Badge>
       ),
     },
   ];
 }
-

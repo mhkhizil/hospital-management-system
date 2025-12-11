@@ -90,7 +90,9 @@ function InfoItem({
 /**
  * Get status badge variant
  */
-function getStatusVariant(status: string): "default" | "secondary" | "destructive" | "outline" {
+function getStatusVariant(
+  status: string
+): "default" | "secondary" | "destructive" | "outline" {
   switch (status) {
     case "admitted":
       return "default";
@@ -117,7 +119,7 @@ export function AdmissionDetail({
   canDischarge = false,
 }: AdmissionDetailProps) {
   const [isTreatmentRecordsOpen, setIsTreatmentRecordsOpen] = useState(false);
-  
+
   const isAdmitted = admission.status === "admitted";
   const isOutpatient = admission.admission_type === "outpatient";
   const canConvert = isAdmitted && isOutpatient && canEdit;
@@ -134,18 +136,31 @@ export function AdmissionDetail({
           </Button>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-semibold">{admission.admission_number}</h2>
-              <Badge variant={getStatusVariant(admission.status)} className="capitalize">
+              <h2 className="text-xl font-semibold">
+                {admission.admission_number}
+              </h2>
+              <Badge
+                variant={getStatusVariant(admission.status)}
+                className="capitalize"
+              >
                 {admission.status}
               </Badge>
-              <Badge variant={admission.admission_type === "inpatient" ? "default" : "outline"} className="capitalize">
+              <Badge
+                variant={
+                  admission.admission_type === "inpatient"
+                    ? "default"
+                    : "outline"
+                }
+                className="capitalize"
+              >
                 {admission.admission_type}
               </Badge>
             </div>
             {admission.patient && (
               <p className="text-sm text-muted-foreground mt-1">
                 Patient: {admission.patient.name}
-                {admission.patient.nrc_number && ` (${admission.patient.nrc_number})`}
+                {admission.patient.nrc_number &&
+                  ` (${admission.patient.nrc_number})`}
               </p>
             )}
           </div>
@@ -189,20 +204,36 @@ export function AdmissionDetail({
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <InfoItem label="Admission Date" value={formatDateTime(admission.admission_date, admission.admission_time)} />
+              <InfoItem
+                label="Admission Date"
+                value={formatDateTime(
+                  admission.admission_date,
+                  admission.admission_time
+                )}
+              />
               <InfoItem label="Service" value={admission.service} />
             </div>
-            {admission.length_of_stay !== undefined && admission.length_of_stay > 0 && (
-              <InfoItem label="Length of Stay" value={`${admission.length_of_stay} day(s)`} />
-            )}
-            <InfoItem label="Reason for Admission" value={admission.admitted_for} className="col-span-2" />
+            {admission.length_of_stay !== undefined &&
+              admission.length_of_stay > 0 && (
+                <InfoItem
+                  label="Length of Stay"
+                  value={`${admission.length_of_stay} day(s)`}
+                />
+              )}
+            <InfoItem
+              label="Reason for Admission"
+              value={admission.admitted_for}
+              className="col-span-2"
+            />
             {admission.referred_by && (
               <InfoItem label="Referred By" value={admission.referred_by} />
             )}
             {admission.police_case === "yes" && (
               <div className="flex items-center gap-2 p-2 bg-destructive/10 rounded-lg">
                 <AlertCircle className="h-4 w-4 text-destructive" />
-                <span className="text-sm text-destructive font-medium">Police Case</span>
+                <span className="text-sm text-destructive font-medium">
+                  Police Case
+                </span>
               </div>
             )}
           </CardContent>
@@ -238,11 +269,16 @@ export function AdmissionDetail({
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                {isOutpatient ? "Outpatient visit - no ward assignment" : "No ward assigned"}
+                {isOutpatient
+                  ? "Outpatient visit - no ward assignment"
+                  : "No ward assigned"}
               </p>
             )}
             {admission.present_address && (
-              <InfoItem label="Present Address" value={admission.present_address} />
+              <InfoItem
+                label="Present Address"
+                value={admission.present_address}
+              />
             )}
           </CardContent>
         </Card>
@@ -264,9 +300,13 @@ export function AdmissionDetail({
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Doctor</p>
-                    <p className="text-sm font-medium">{admission.doctor.name}</p>
+                    <p className="text-sm font-medium">
+                      {admission.doctor.name}
+                    </p>
                     {admission.doctor.email && (
-                      <p className="text-xs text-muted-foreground">{admission.doctor.email}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {admission.doctor.email}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -278,19 +318,31 @@ export function AdmissionDetail({
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Nurse</p>
-                    <p className="text-sm font-medium">{admission.nurse.name}</p>
+                    <p className="text-sm font-medium">
+                      {admission.nurse.name}
+                    </p>
                     {admission.nurse.email && (
-                      <p className="text-xs text-muted-foreground">{admission.nurse.email}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {admission.nurse.email}
+                      </p>
                     )}
                   </div>
                 </div>
               )}
             </div>
             {admission.medical_officer && (
-              <InfoItem label="Medical Officer" value={admission.medical_officer} className="mt-4" />
+              <InfoItem
+                label="Medical Officer"
+                value={admission.medical_officer}
+                className="mt-4"
+              />
             )}
             {admission.attending_doctor_name && (
-              <InfoItem label="Attending Doctor" value={admission.attending_doctor_name} className="mt-4" />
+              <InfoItem
+                label="Attending Doctor"
+                value={admission.attending_doctor_name}
+                className="mt-4"
+              />
             )}
           </CardContent>
         </Card>
@@ -304,10 +356,15 @@ export function AdmissionDetail({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <InfoItem label="Initial Diagnosis" value={admission.initial_diagnosis} />
+            <InfoItem
+              label="Initial Diagnosis"
+              value={admission.initial_diagnosis}
+            />
             {admission.drug_allergy_noted && (
               <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
-                <p className="text-xs text-amber-600 font-medium">Drug Allergies</p>
+                <p className="text-xs text-amber-600 font-medium">
+                  Drug Allergies
+                </p>
                 <p className="text-sm">{admission.drug_allergy_noted}</p>
               </div>
             )}
@@ -326,27 +383,60 @@ export function AdmissionDetail({
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <InfoItem label="Discharge Date" value={formatDateTime(admission.discharge_date, admission.discharge_time)} />
-                <InfoItem label="Discharge Type" value={admission.discharge_type} />
-                <InfoItem label="Discharge Status" value={admission.discharge_status} />
-                <InfoItem label="Follow-up Date" value={formatDate(admission.follow_up_date)} />
+                <InfoItem
+                  label="Discharge Date"
+                  value={formatDateTime(
+                    admission.discharge_date,
+                    admission.discharge_time
+                  )}
+                />
+                <InfoItem
+                  label="Discharge Type"
+                  value={admission.discharge_type}
+                />
+                <InfoItem
+                  label="Discharge Status"
+                  value={admission.discharge_status}
+                />
+                <InfoItem
+                  label="Follow-up Date"
+                  value={formatDate(admission.follow_up_date)}
+                />
               </div>
               <div className="mt-4 space-y-4">
-                <InfoItem label="Discharge Diagnosis" value={admission.discharge_diagnosis} />
+                <InfoItem
+                  label="Discharge Diagnosis"
+                  value={admission.discharge_diagnosis}
+                />
                 {admission.other_diagnosis && (
-                  <InfoItem label="Other Diagnosis" value={admission.other_diagnosis} />
+                  <InfoItem
+                    label="Other Diagnosis"
+                    value={admission.other_diagnosis}
+                  />
                 )}
                 {admission.clinician_summary && (
-                  <InfoItem label="Clinician Summary" value={admission.clinician_summary} />
+                  <InfoItem
+                    label="Clinician Summary"
+                    value={admission.clinician_summary}
+                  />
                 )}
                 {admission.surgical_procedure && (
-                  <InfoItem label="Surgical Procedure" value={admission.surgical_procedure} />
+                  <InfoItem
+                    label="Surgical Procedure"
+                    value={admission.surgical_procedure}
+                  />
                 )}
                 {admission.discharge_instructions && (
-                  <InfoItem label="Discharge Instructions" value={admission.discharge_instructions} />
+                  <InfoItem
+                    label="Discharge Instructions"
+                    value={admission.discharge_instructions}
+                  />
                 )}
                 {admission.follow_up_instructions && (
-                  <InfoItem label="Follow-up Instructions" value={admission.follow_up_instructions} />
+                  <InfoItem
+                    label="Follow-up Instructions"
+                    value={admission.follow_up_instructions}
+                  />
                 )}
               </div>
             </CardContent>
@@ -364,8 +454,15 @@ export function AdmissionDetail({
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <InfoItem label="Cause of Death" value={admission.cause_of_death} className="sm:col-span-2" />
-                <InfoItem label="Time of Death" value={admission.time_of_death} />
+                <InfoItem
+                  label="Cause of Death"
+                  value={admission.cause_of_death}
+                  className="sm:col-span-2"
+                />
+                <InfoItem
+                  label="Time of Death"
+                  value={admission.time_of_death}
+                />
                 <InfoItem label="Autopsy" value={admission.autopsy} />
                 <InfoItem label="Certified By" value={admission.certified_by} />
                 <InfoItem label="Approved By" value={admission.approved_by} />
@@ -376,163 +473,198 @@ export function AdmissionDetail({
       </div>
 
       {/* Treatment Records */}
-      {admission.treatment_records && admission.treatment_records.length > 0 && (
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Treatment Records ({admission.treatment_records.length})
-              </CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsTreatmentRecordsOpen(!isTreatmentRecordsOpen)}
-                className="h-8 w-8 p-0"
-              >
-                {isTreatmentRecordsOpen ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </CardHeader>
-          {isTreatmentRecordsOpen && (
-            <CardContent>
-              <div className="space-y-4">
-              {admission.treatment_records.map((record) => (
-                <div
-                  key={record.id}
-                  className="border rounded-lg p-4 space-y-3"
+      {admission.treatment_records &&
+        admission.treatment_records.length > 0 && (
+          <Card className="lg:col-span-2">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Treatment Records ({admission.treatment_records.length})
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    setIsTreatmentRecordsOpen(!isTreatmentRecordsOpen)
+                  }
+                  className="h-8 w-8 p-0"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h4 className="font-semibold text-sm">{record.treatment_name || "Treatment"}</h4>
-                        {record.treatment_type && (
-                          <Badge variant="outline" className="text-xs capitalize">
-                            {record.treatment_type}
-                          </Badge>
-                        )}
-                        {record.outcome && (
-                          <Badge
-                            variant={
-                              record.outcome === "completed"
-                                ? "default"
-                                : record.outcome === "ongoing"
-                                ? "secondary"
-                                : "outline"
-                            }
-                            className="text-xs capitalize"
-                          >
-                            {record.outcome}
-                          </Badge>
-                        )}
+                  {isTreatmentRecordsOpen ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </CardHeader>
+            {isTreatmentRecordsOpen && (
+              <CardContent>
+                <div className="space-y-4">
+                  {admission.treatment_records.map((record) => (
+                    <div
+                      key={record.id}
+                      className="border rounded-lg p-4 space-y-3"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="font-semibold text-sm">
+                              {record.treatment_name || "Treatment"}
+                            </h4>
+                            {record.treatment_type && (
+                              <Badge
+                                variant="outline"
+                                className="text-xs capitalize"
+                              >
+                                {record.treatment_type}
+                              </Badge>
+                            )}
+                            {record.outcome && (
+                              <Badge
+                                variant={
+                                  record.outcome === "completed"
+                                    ? "default"
+                                    : record.outcome === "ongoing"
+                                    ? "secondary"
+                                    : "outline"
+                                }
+                                className="text-xs capitalize"
+                              >
+                                {record.outcome}
+                              </Badge>
+                            )}
+                          </div>
+                          {record.description && (
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {record.description}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {onViewTreatment && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onViewTreatment(record.id);
+                              }}
+                              className="h-7 text-xs"
+                            >
+                              <Eye className="h-3 w-3 mr-1.5" />
+                              Go to Treatment
+                            </Button>
+                          )}
+                          <div className="text-xs text-muted-foreground text-right">
+                            {record.treatment_date && (
+                              <div>
+                                {formatDateTime(
+                                  record.treatment_date,
+                                  record.treatment_time
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      {record.description && (
-                        <p className="text-sm text-muted-foreground mb-2">{record.description}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {onViewTreatment && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onViewTreatment(record.id);
-                          }}
-                          className="h-7 text-xs"
-                        >
-                          <Eye className="h-3 w-3 mr-1.5" />
-                          Go to Treatment
-                        </Button>
-                      )}
-                      <div className="text-xs text-muted-foreground text-right">
-                        {record.treatment_date && (
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        {record.medications && (
                           <div>
-                            {formatDateTime(record.treatment_date, record.treatment_time)}
+                            <p className="text-xs text-muted-foreground mb-1">
+                              Medications
+                            </p>
+                            <p className="font-medium">{record.medications}</p>
+                          </div>
+                        )}
+                        {record.dosage && (
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">
+                              Dosage
+                            </p>
+                            <p className="font-medium">{record.dosage}</p>
+                          </div>
+                        )}
+                        {record.results && (
+                          <div className="md:col-span-2">
+                            <p className="text-xs text-muted-foreground mb-1">
+                              Results
+                            </p>
+                            <p>{record.results}</p>
+                          </div>
+                        )}
+                        {record.findings && (
+                          <div className="md:col-span-2">
+                            <p className="text-xs text-muted-foreground mb-1">
+                              Findings
+                            </p>
+                            <p>{record.findings}</p>
+                          </div>
+                        )}
+                        {record.notes && (
+                          <div className="md:col-span-2">
+                            <p className="text-xs text-muted-foreground mb-1">
+                              Notes
+                            </p>
+                            <p>{record.notes}</p>
+                          </div>
+                        )}
+                        {record.pre_procedure_notes && (
+                          <div className="md:col-span-2">
+                            <p className="text-xs text-muted-foreground mb-1">
+                              Pre-Procedure Notes
+                            </p>
+                            <p>{record.pre_procedure_notes}</p>
+                          </div>
+                        )}
+                        {record.post_procedure_notes && (
+                          <div className="md:col-span-2">
+                            <p className="text-xs text-muted-foreground mb-1">
+                              Post-Procedure Notes
+                            </p>
+                            <p>{record.post_procedure_notes}</p>
+                          </div>
+                        )}
+                        {record.complications && (
+                          <div className="md:col-span-2">
+                            <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                              <p className="text-xs text-amber-600 font-medium mb-1">
+                                Complications
+                              </p>
+                              <p className="text-sm">{record.complications}</p>
+                            </div>
                           </div>
                         )}
                       </div>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    {record.medications && (
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">Medications</p>
-                        <p className="font-medium">{record.medications}</p>
-                      </div>
-                    )}
-                    {record.dosage && (
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">Dosage</p>
-                        <p className="font-medium">{record.dosage}</p>
-                      </div>
-                    )}
-                    {record.results && (
-                      <div className="md:col-span-2">
-                        <p className="text-xs text-muted-foreground mb-1">Results</p>
-                        <p>{record.results}</p>
-                      </div>
-                    )}
-                    {record.findings && (
-                      <div className="md:col-span-2">
-                        <p className="text-xs text-muted-foreground mb-1">Findings</p>
-                        <p>{record.findings}</p>
-                      </div>
-                    )}
-                    {record.notes && (
-                      <div className="md:col-span-2">
-                        <p className="text-xs text-muted-foreground mb-1">Notes</p>
-                        <p>{record.notes}</p>
-                      </div>
-                    )}
-                    {record.pre_procedure_notes && (
-                      <div className="md:col-span-2">
-                        <p className="text-xs text-muted-foreground mb-1">Pre-Procedure Notes</p>
-                        <p>{record.pre_procedure_notes}</p>
-                      </div>
-                    )}
-                    {record.post_procedure_notes && (
-                      <div className="md:col-span-2">
-                        <p className="text-xs text-muted-foreground mb-1">Post-Procedure Notes</p>
-                        <p>{record.post_procedure_notes}</p>
-                      </div>
-                    )}
-                    {record.complications && (
-                      <div className="md:col-span-2">
-                        <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
-                          <p className="text-xs text-amber-600 font-medium mb-1">Complications</p>
-                          <p className="text-sm">{record.complications}</p>
+                      {(record.doctor || record.nurse) && (
+                        <div className="flex flex-wrap gap-4 pt-2 border-t text-xs">
+                          {record.doctor && (
+                            <span className="text-muted-foreground">
+                              Doctor:{" "}
+                              <span className="font-medium">
+                                {record.doctor.name}
+                              </span>
+                            </span>
+                          )}
+                          {record.nurse && (
+                            <span className="text-muted-foreground">
+                              Nurse:{" "}
+                              <span className="font-medium">
+                                {record.nurse.name}
+                              </span>
+                            </span>
+                          )}
                         </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {(record.doctor || record.nurse) && (
-                    <div className="flex flex-wrap gap-4 pt-2 border-t text-xs">
-                      {record.doctor && (
-                        <span className="text-muted-foreground">
-                          Doctor: <span className="font-medium">{record.doctor.name}</span>
-                        </span>
-                      )}
-                      {record.nurse && (
-                        <span className="text-muted-foreground">
-                          Nurse: <span className="font-medium">{record.nurse.name}</span>
-                        </span>
                       )}
                     </div>
-                  )}
+                  ))}
                 </div>
-              ))}
-              </div>
-            </CardContent>
-          )}
-        </Card>
-      )}
+              </CardContent>
+            )}
+          </Card>
+        )}
 
       {/* Timestamps */}
       <div className="flex flex-wrap gap-4 text-xs text-muted-foreground pt-4 border-t">
@@ -548,14 +680,14 @@ export function AdmissionDetail({
             Updated: {formatDate(admission.updated_at)}
           </span>
         )}
-        {admission.treatment_records_count !== undefined && admission.treatment_records_count > 0 && (
-          <span className="flex items-center gap-1">
-            <FileText className="h-3 w-3" />
-            {admission.treatment_records_count} treatment record(s)
-          </span>
-        )}
+        {admission.treatment_records_count !== undefined &&
+          admission.treatment_records_count > 0 && (
+            <span className="flex items-center gap-1">
+              <FileText className="h-3 w-3" />
+              {admission.treatment_records_count} treatment record(s)
+            </span>
+          )}
       </div>
     </div>
   );
 }
-

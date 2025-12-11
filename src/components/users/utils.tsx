@@ -73,4 +73,3 @@ export function renderRootUserName(user: User) {
     </div>
   );
 }
-
