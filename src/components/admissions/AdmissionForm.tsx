@@ -13,9 +13,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, AlertCircle } from "lucide-react";
+import { AddressSelector } from "@/components/common/AddressSelector";
+import { useAddress } from "@/core/presentation/hooks/useAddress";
 import type { AdmissionFormDTO } from "@/core/application/dtos/AdmissionDTO";
 import type { Staff } from "@/core/domain/entities/Staff";
 import type { PatientListDTO } from "@/core/application/dtos/PatientDTO";
+import type { AddressComponents } from "@/core/domain/entities/Address";
 
 interface AdmissionFormProps {
   patient: PatientListDTO;
@@ -44,6 +47,8 @@ export function AdmissionForm({
   onCancel,
   isLoading = false,
 }: AdmissionFormProps) {
+  const { toAddressJSON } = useAddress();
+
   const [formData, setFormData] = useState<AdmissionFormDTO>({
     admission_type: "inpatient",
     admission_date: new Date().toISOString().split("T")[0],
@@ -65,6 +70,10 @@ export function AdmissionForm({
 
   const [activeSection, setActiveSection] = useState<string>("basic");
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Address state
+  const [addressComponents, setAddressComponents] =
+    useState<AddressComponents | null>(null);
 
   const isOutpatient = formData.admission_type === "outpatient";
 
@@ -88,6 +97,15 @@ export function AdmissionForm({
       [field]: value === "" ? undefined : value,
     }));
     setValidationError(null);
+  };
+
+  const handleAddressChange = (address: AddressComponents | null) => {
+    setAddressComponents(address);
+    const addressJSON = toAddressJSON(address);
+    setFormData((prev) => ({
+      ...prev,
+      present_address: addressJSON || "",
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -276,14 +294,10 @@ export function AdmissionForm({
           )}
 
           <div className="md:col-span-2">
-            <Label htmlFor="present_address">Present Address</Label>
-            <Textarea
-              id="present_address"
-              value={formData.present_address || ""}
-              onChange={(e) => handleChange("present_address", e.target.value)}
-              placeholder="Current address at time of admission"
-              className="mt-1.5"
-              rows={2}
+            <AddressSelector
+              value={addressComponents}
+              onChange={handleAddressChange}
+              label="Present Address"
             />
           </div>
 

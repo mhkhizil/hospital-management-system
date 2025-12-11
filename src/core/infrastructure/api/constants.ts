@@ -78,4 +78,13 @@ export const API_ENDPOINTS = {
     TYPES: "/api/treatment-options/types",
     OUTCOMES: "/api/treatment-options/outcomes",
   },
+  NRC: {
+    CODES: "/api/nrc-codes",
+  },
+  ADDRESSES: {
+    MYANMAR: "/api/addresses/myanmar",
+  },
+  NRC: {
+    CODES: "/api/nrc-codes",
+  },
 } as const;

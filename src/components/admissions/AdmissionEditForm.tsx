@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,11 +13,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
+import { AddressSelector } from "@/components/common/AddressSelector";
+import { useAddress } from "@/core/presentation/hooks/useAddress";
 import type {
   AdmissionDetailDTO,
   AdmissionFormDTO,
 } from "@/core/application/dtos/AdmissionDTO";
 import type { Staff } from "@/core/domain/entities/Staff";
+import type { AddressComponents } from "@/core/domain/entities/Address";
 
 interface AdmissionEditFormProps {
   admission: AdmissionDetailDTO;
@@ -43,6 +46,8 @@ export function AdmissionEditForm({
   isLoading = false,
   canEditAdmin = false,
 }: AdmissionEditFormProps) {
+  const { parseAddressJSON, toAddressJSON } = useAddress();
+
   const [formData, setFormData] = useState<Partial<AdmissionFormDTO>>({
     // Admin fields
     doctor_id: admission.doctor?.id,
@@ -66,6 +71,17 @@ export function AdmissionEditForm({
   );
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  // Address state
+  const [addressComponents, setAddressComponents] =
+    useState<AddressComponents | null>(() =>
+      parseAddressJSON(admission.present_address)
+    );
+
+  // Update address when admission changes
+  useEffect(() => {
+    setAddressComponents(parseAddressJSON(admission.present_address));
+  }, [admission.present_address, parseAddressJSON]);
+
   const isOutpatient = admission.admission_type === "outpatient";
   const isDischarged = admission.status === "discharged";
   const isDeceased = admission.status === "deceased";
@@ -79,6 +95,15 @@ export function AdmissionEditForm({
       [field]: value === "" ? undefined : value,
     }));
     setValidationError(null);
+  };
+
+  const handleAddressChange = (address: AddressComponents | null) => {
+    setAddressComponents(address);
+    const addressJSON = toAddressJSON(address);
+    setFormData((prev) => ({
+      ...prev,
+      present_address: addressJSON || "",
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -250,14 +275,10 @@ export function AdmissionEditForm({
           )}
 
           <div className="md:col-span-2">
-            <Label htmlFor="present_address">Present Address</Label>
-            <Textarea
-              id="present_address"
-              value={formData.present_address || ""}
-              onChange={(e) => handleChange("present_address", e.target.value)}
-              placeholder="Current address"
-              className="mt-1.5"
-              rows={2}
+            <AddressSelector
+              value={addressComponents}
+              onChange={handleAddressChange}
+              label="Present Address"
               disabled={isDischarged || isDeceased}
             />
           </div>

@@ -27,6 +27,7 @@ import {
   DollarSign,
   Eye,
 } from "lucide-react";
+import { useAddress } from "@/core/presentation/hooks/useAddress";
 import type {
   PatientDetailDTO,
   AdmissionDTO,
@@ -69,6 +70,7 @@ function AdmissionCard({
   admission,
   formatDate,
   formatDateTime,
+  formatAddressForDisplay,
   onViewAdmission,
 }: {
   admission: AdmissionDTO;
@@ -77,6 +79,7 @@ function AdmissionCard({
     d: string | null | undefined,
     t: string | null | undefined
   ) => string | null;
+  formatAddressForDisplay: (addressJSON: string | null | undefined) => string;
   onViewAdmission?: (admissionId: number) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -220,7 +223,7 @@ function AdmissionCard({
               <InfoItem label="Bed Number" value={admission.bed_number} />
               <InfoItem
                 label="Present Address"
-                value={admission.present_address}
+                value={formatAddressForDisplay(admission.present_address)}
               />
               <InfoItem label="Referred By" value={admission.referred_by} />
               <InfoItem label="Police Case" value={admission.police_case} />
@@ -445,6 +448,8 @@ export function PatientDetail({
   canEdit = false,
   isLoadingAdmissions = false,
 }: PatientDetailProps) {
+  const { formatAddressForDisplay } = useAddress();
+
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return null;
     return new Date(dateStr).toLocaleDateString("en-US", {
@@ -550,7 +555,7 @@ export function PatientDetail({
             />
             <InfoItem
               label="Permanent Address"
-              value={patient.permanent_address}
+              value={formatAddressForDisplay(patient.permanent_address)}
               icon={<MapPin className="h-4 w-4" />}
             />
           </CardContent>
@@ -666,6 +671,7 @@ export function PatientDetail({
                   admission={admission}
                   formatDate={formatDate}
                   formatDateTime={formatDateTime}
+                  formatAddressForDisplay={formatAddressForDisplay}
                   onViewAdmission={onViewAdmission}
                 />
               ))}

@@ -12,6 +12,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import { AddressSelector } from "@/components/common/AddressSelector";
+import { NrcSelector } from "@/components/common/NrcSelector";
+import { useAddress } from "@/core/presentation/hooks/useAddress";
 import type {
   PatientFormDTO,
   PatientDetailDTO,
@@ -21,6 +24,7 @@ import type {
   BloodType,
   MaritalStatus,
 } from "@/core/domain/entities/Patient";
+import type { AddressComponents } from "@/core/domain/entities/Address";
 
 interface PatientFormProps {
   initialData?: PatientDetailDTO;
@@ -60,6 +64,8 @@ export function PatientForm({
   onCancel,
   isLoading = false,
 }: PatientFormProps) {
+  const { parseAddressJSON, toAddressJSON } = useAddress();
+
   // Helper function to convert ISO date string to YYYY-MM-DD format for date input
   const formatDateForInput = (
     dateStr: string | null | undefined
@@ -78,7 +84,7 @@ export function PatientForm({
   // Initialize form data from initialData
   const initializeFormData = (data?: PatientDetailDTO): PatientFormDTO => ({
     name: data?.name || "",
-    nrc_number: data?.nrc_number || undefined,
+    nrc_number: data?.nrc_number || "",
     sex: data?.sex || undefined,
     age: data?.age || undefined,
     dob: formatDateForInput(data?.dob),
@@ -103,10 +109,17 @@ export function PatientForm({
   );
   const [activeSection, setActiveSection] = useState<string>("basic");
 
+  // Address state
+  const [addressComponents, setAddressComponents] =
+    useState<AddressComponents | null>(() =>
+      parseAddressJSON(initialData?.permanent_address)
+    );
+
   // Update form data when initialData changes (e.g., when switching to edit mode)
   useEffect(() => {
     setFormData(initializeFormData(initialData));
-  }, [initialData]);
+    setAddressComponents(parseAddressJSON(initialData?.permanent_address));
+  }, [initialData, parseAddressJSON]);
 
   const handleChange = (
     field: keyof PatientFormDTO,
@@ -123,8 +136,29 @@ export function PatientForm({
     });
   };
 
+  const handleAddressChange = (address: AddressComponents | null) => {
+    setAddressComponents(address);
+    const addressJSON = toAddressJSON(address);
+    setFormData((prev) => ({
+      ...prev,
+      permanent_address: addressJSON || undefined,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate required fields
+    if (!formData.name?.trim()) {
+      // This validation could be enhanced with proper error display
+      return;
+    }
+
+    if (!formData.nrc_number?.trim()) {
+      // This validation could be enhanced with proper error display
+      return;
+    }
+
     await onSubmit(formData);
     // Note: If update fails, error is handled by parent component
     // We keep user's form data so they can fix any issues and retry
@@ -172,14 +206,12 @@ export function PatientForm({
             />
           </div>
 
-          <div>
-            <Label htmlFor="nrc_number">NRC Number</Label>
-            <Input
-              id="nrc_number"
+          <div className="md:col-span-2">
+            <NrcSelector
               value={formData.nrc_number || ""}
-              onChange={(e) => handleChange("nrc_number", e.target.value)}
-              placeholder="e.g., 12/ABC(N)123456"
-              className="mt-1.5"
+              onChange={(nrcNumber) => handleChange("nrc_number", nrcNumber)}
+              label="NRC Number"
+              required
             />
           </div>
 
@@ -349,15 +381,10 @@ export function PatientForm({
           </div>
 
           <div className="md:col-span-2">
-            <Label htmlFor="permanent_address">Permanent Address</Label>
-            <Input
-              id="permanent_address"
-              value={formData.permanent_address || ""}
-              onChange={(e) =>
-                handleChange("permanent_address", e.target.value)
-              }
-              placeholder="Enter full address"
-              className="mt-1.5"
+            <AddressSelector
+              value={addressComponents}
+              onChange={handleAddressChange}
+              label="Permanent Address"
             />
           </div>
         </div>
@@ -458,7 +485,11 @@ export function PatientForm({
         </Button>
         <Button
           type="submit"
-          disabled={isLoading || !(formData.name || "").trim()}
+          disabled={
+            isLoading ||
+            !(formData.name || "").trim() ||
+            !(formData.nrc_number || "").trim()
+          }
         >
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {initialData ? "Update Patient" : "Register Patient"}
