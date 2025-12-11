@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import { container, TOKENS } from "@/core/infrastructure/di/container";
 import { WardManagementService } from "@/core/application/services/WardManagementService";
 import { ApiError } from "@/core/infrastructure/api/HttpClient";
-import type { WardsData, WardData } from "@/core/domain/entities/Ward";
+import type { WardsData } from "@/core/domain/entities/Ward";
 
 /**
  * State interface for ward management
@@ -46,9 +46,7 @@ export function useWards() {
       });
     } catch (err) {
       const errorMessage =
-        err instanceof ApiError
-          ? err.message
-          : "Failed to load wards";
+        err instanceof ApiError ? err.message : "Failed to load wards";
       setState({
         wards: null,
         isLoading: false,
@@ -118,4 +116,3 @@ export function useWards() {
     getWardName,
   };
 }
-

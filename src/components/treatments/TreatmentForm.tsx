@@ -12,7 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, ArrowLeft, AlertCircle } from "lucide-react";
+import {
+  Loader2,
+  ArrowLeft,
+  AlertCircle,
+  Upload,
+  X,
+  FileText,
+  ExternalLink,
+} from "lucide-react";
 import type {
   TreatmentFormDTO,
   TreatmentDetailDTO,
@@ -72,7 +80,8 @@ interface TreatmentFormProps {
   initialData?: TreatmentDetailDTO;
   doctors: Staff[];
   nurses: Staff[];
-  onSubmit: (data: TreatmentFormDTO) => Promise<void>;
+  onSubmit: (data: TreatmentFormDTO, attachments?: File[]) => Promise<void>;
+  onRemoveAttachment?: (filename: string) => Promise<boolean>;
   onCancel: () => void;
   isLoading?: boolean;
   isEdit?: boolean;
@@ -83,6 +92,7 @@ export function TreatmentForm({
   doctors,
   nurses,
   onSubmit,
+  onRemoveAttachment,
   onCancel,
   isLoading = false,
   isEdit = false,
@@ -108,6 +118,7 @@ export function TreatmentForm({
 
   const [activeSection, setActiveSection] = useState<string>("basic");
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [attachments, setAttachments] = useState<File[]>([]);
 
   // Update form data when initialData changes (for edit mode)
   useEffect(() => {
@@ -144,6 +155,57 @@ export function TreatmentForm({
     setValidationError(null);
   };
 
+  /**
+   * Handle file selection
+   */
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+
+    // Validate files
+    const validFiles: File[] = [];
+    const errors: string[] = [];
+
+    files.forEach((file) => {
+      // Check file type (PDF only)
+      if (file.type !== "application/pdf") {
+        errors.push(`${file.name} is not a PDF file`);
+        return;
+      }
+
+      // Check file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        errors.push(`${file.name} is larger than 5MB`);
+        return;
+      }
+
+      validFiles.push(file);
+    });
+
+    // Check total file count (max 10)
+    if (attachments.length + validFiles.length > 10) {
+      errors.push("Maximum 10 files allowed");
+      return;
+    }
+
+    if (errors.length > 0) {
+      setValidationError(errors.join(", "));
+      return;
+    }
+
+    setAttachments((prev) => [...prev, ...validFiles]);
+    setValidationError(null);
+
+    // Clear the input
+    e.target.value = "";
+  };
+
+  /**
+   * Remove a file from attachments
+   */
+  const removeFile = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError(null);
@@ -158,7 +220,7 @@ export function TreatmentForm({
       return;
     }
 
-    await onSubmit(formData);
+    await onSubmit(formData, attachments.length > 0 ? attachments : undefined);
   };
 
   const sections = [
@@ -166,6 +228,7 @@ export function TreatmentForm({
     { id: "medication", label: "Medication" },
     { id: "results", label: "Results" },
     { id: "procedure", label: "Procedure Notes" },
+    { id: "attachments", label: "Attachments" },
     { id: "staff", label: "Staff" },
   ];
 
@@ -443,6 +506,159 @@ export function TreatmentForm({
               placeholder="Notes after the procedure (recovery, observations, instructions, etc.)"
               rows={4}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Attachments Section */}
+      {activeSection === "attachments" && (
+        <div className="space-y-4">
+          <div>
+            <Label>Medical Document Attachments</Label>
+            <p className="text-sm text-muted-foreground mb-4">
+              Upload PDF documents related to this treatment (max 10 files, 5MB
+              each)
+            </p>
+
+            {/* File Upload Area */}
+            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+              <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+              <div className="text-sm">
+                <label htmlFor="file-upload" className="cursor-pointer">
+                  <span className="font-medium text-primary hover:text-primary/80">
+                    Click to upload
+                  </span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    or drag and drop
+                  </span>
+                </label>
+                <input
+                  id="file-upload"
+                  type="file"
+                  multiple
+                  accept=".pdf"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                PDF files only, up to 5MB each
+              </p>
+            </div>
+
+            {/* Existing Attachments (Edit Mode) */}
+            {initialData?.attachments && initialData.attachments.length > 0 && (
+              <div className="space-y-2 mt-4">
+                <Label className="text-sm font-medium">
+                  Existing Attachments ({initialData.attachments.length})
+                </Label>
+                {initialData.attachments.map((attachment, index) => {
+                  // Find corresponding URL
+                  const attachmentUrl = initialData.attachment_urls?.find(
+                    (url) => url.filename === attachment.filename
+                  );
+
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800"
+                    >
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        <div>
+                          <p className="text-sm font-medium truncate max-w-xs">
+                            {attachment.filename}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {(attachment.size / 1024 / 1024).toFixed(2)} MB •{" "}
+                            {new Date(
+                              attachment.uploaded_at
+                            ).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        {attachmentUrl && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              window.open(attachmentUrl.url, "_blank")
+                            }
+                            className="flex items-center gap-1"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            View
+                          </Button>
+                        )}
+                        {onRemoveAttachment && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              const success = await onRemoveAttachment(
+                                attachment.filename
+                              );
+                              if (success) {
+                                // Refresh the page to show updated attachments
+                                window.location.reload();
+                              }
+                            }}
+                            className="flex items-center gap-1 text-destructive hover:text-destructive"
+                          >
+                            <X className="h-3 w-3" />
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                <p className="text-xs text-muted-foreground mt-2">
+                  Existing attachments will be preserved. You can add new
+                  attachments below.
+                </p>
+              </div>
+            )}
+
+            {/* Uploaded Files List */}
+            {attachments.length > 0 && (
+              <div className="space-y-2 mt-4">
+                <Label className="text-sm font-medium">
+                  New Files to Upload ({attachments.length}/10)
+                </Label>
+                {attachments.map((file, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border"
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium truncate max-w-xs">
+                          {file.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeFile(index)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

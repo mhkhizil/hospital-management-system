@@ -6,6 +6,8 @@ import type {
   UpdateTreatmentData,
   TreatmentType,
   TreatmentOutcome,
+  TreatmentAttachment,
+  TreatmentAttachmentWithUrl,
 } from "@/core/domain/entities/Treatment";
 import type { StaffReference } from "@/core/domain/entities/Patient";
 import { HttpClient } from "@/core/infrastructure/api/HttpClient";
@@ -38,6 +40,8 @@ interface TreatmentResponse {
   pre_procedure_notes?: string;
   post_procedure_notes?: string;
   complications?: string;
+  attachments?: TreatmentAttachment[];
+  attachment_urls?: TreatmentAttachmentWithUrl[];
   doctor_id?: number;
   nurse_id?: number;
   created_at?: string;
@@ -95,6 +99,8 @@ function mapTreatmentResponse(data: TreatmentResponse): Treatment {
     pre_procedure_notes: data.pre_procedure_notes,
     post_procedure_notes: data.post_procedure_notes,
     complications: data.complications,
+    attachments: data.attachments,
+    attachment_urls: data.attachment_urls,
     doctor_id: data.doctor_id,
     nurse_id: data.nurse_id,
     created_at: data.created_at,
@@ -144,11 +150,33 @@ export class ApiTreatmentRepository implements ITreatmentRepository {
    */
   async create(
     admissionId: number,
-    treatmentData: CreateTreatmentData
+    treatmentData: CreateTreatmentData,
+    attachments?: File[]
   ): Promise<Treatment> {
+    let requestData: CreateTreatmentData | FormData = treatmentData;
+
+    // If attachments are provided, use FormData with individual fields
+    if (attachments && attachments.length > 0) {
+      const formData = new FormData();
+
+      // Add treatment data as individual form fields
+      Object.entries(treatmentData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+
+      // Add attachments
+      attachments.forEach((file, index) => {
+        formData.append(`attachments[${index}]`, file);
+      });
+
+      requestData = formData;
+    }
+
     const { data } = await this.http.post<TreatmentApiResponse>(
       API_ENDPOINTS.TREATMENTS.CREATE(admissionId),
-      treatmentData
+      requestData
     );
 
     return mapTreatmentResponse(data.data);
@@ -160,8 +188,39 @@ export class ApiTreatmentRepository implements ITreatmentRepository {
   async update(
     admissionId: number,
     treatmentId: number,
-    treatmentData: UpdateTreatmentData
+    treatmentData: UpdateTreatmentData,
+    attachments?: File[]
   ): Promise<Treatment> {
+    // If attachments are provided, use FormData with POST + _method spoofing
+    // Laravel requires POST method for file uploads (PATCH doesn't populate $_FILES)
+    if (attachments && attachments.length > 0) {
+      const formData = new FormData();
+
+      // Add Laravel method spoofing for PATCH
+      formData.append("_method", "PATCH");
+
+      // Add treatment data as individual form fields
+      Object.entries(treatmentData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+
+      // Add attachments
+      attachments.forEach((file, index) => {
+        formData.append(`attachments[${index}]`, file);
+      });
+
+      // Use POST with _method: PATCH for file uploads (Laravel requirement)
+      const { data } = await this.http.post<TreatmentApiResponse>(
+        API_ENDPOINTS.TREATMENTS.UPDATE(admissionId, treatmentId),
+        formData
+      );
+
+      return mapTreatmentResponse(data.data);
+    }
+
+    // No attachments - use regular PATCH
     const { data } = await this.http.patch<TreatmentApiResponse>(
       API_ENDPOINTS.TREATMENTS.UPDATE(admissionId, treatmentId),
       treatmentData
@@ -169,6 +228,21 @@ export class ApiTreatmentRepository implements ITreatmentRepository {
 
     return mapTreatmentResponse(data.data);
   }
+
+  /**
+   * Remove an attachment from a treatment record
+   */
+  async removeAttachment(
+    admissionId: number,
+    treatmentId: number,
+    filename: string
+  ): Promise<void> {
+    await this.http.delete(
+      API_ENDPOINTS.TREATMENTS.REMOVE_ATTACHMENT(
+        admissionId,
+        treatmentId,
+        filename
+      )
+    );
+  }
 }
-
-

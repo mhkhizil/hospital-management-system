@@ -1,6 +1,23 @@
 import type { StaffReference } from "./Patient";
 
 /**
+ * Treatment Attachment
+ */
+export interface TreatmentAttachment {
+  filename: string;
+  path: string;
+  size: number;
+  uploaded_at: string;
+}
+
+/**
+ * Treatment Attachment with URL
+ */
+export interface TreatmentAttachmentWithUrl extends TreatmentAttachment {
+  url: string;
+}
+
+/**
  * Treatment Types
  */
 export type TreatmentType =
@@ -53,6 +70,8 @@ export interface Treatment {
   complications?: string;
   doctor_id?: number;
   nurse_id?: number;
+  attachments?: TreatmentAttachment[];
+  attachment_urls?: TreatmentAttachmentWithUrl[];
   created_at?: string;
   updated_at?: string;
   doctor?: StaffReference;
@@ -168,5 +187,3 @@ export const TREATMENT_OUTCOMES: TreatmentOutcomeOption[] = [
   { value: "partial", label: "Partial Success" },
   { value: "unsuccessful", label: "Unsuccessful" },
 ];
-
-

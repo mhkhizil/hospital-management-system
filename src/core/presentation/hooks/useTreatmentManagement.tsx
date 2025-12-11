@@ -152,14 +152,16 @@ export function useTreatmentManagement() {
   const createTreatment = useCallback(
     async (
       admissionId: number,
-      data: TreatmentFormDTO
+      data: TreatmentFormDTO,
+      attachments?: File[]
     ): Promise<TreatmentDetailDTO | null> => {
       updateState({ isSubmitting: true, error: null });
 
       try {
         const treatment = await treatmentService.createTreatment(
           admissionId,
-          data
+          data,
+          attachments
         );
         updateState({
           selectedTreatment: treatment,
@@ -197,7 +199,8 @@ export function useTreatmentManagement() {
     async (
       admissionId: number,
       treatmentId: number,
-      data: Partial<TreatmentFormDTO>
+      data: Partial<TreatmentFormDTO>,
+      attachments?: File[]
     ): Promise<TreatmentDetailDTO | null> => {
       updateState({ isSubmitting: true, error: null });
 
@@ -205,7 +208,8 @@ export function useTreatmentManagement() {
         const treatment = await treatmentService.updateTreatment(
           admissionId,
           treatmentId,
-          data
+          data,
+          attachments
         );
         updateState({
           selectedTreatment: treatment,
@@ -231,6 +235,43 @@ export function useTreatmentManagement() {
           });
         }
         return null;
+      }
+    },
+    [treatmentService, updateState]
+  );
+
+  /**
+   * Remove an attachment from a treatment record
+   */
+  const removeAttachment = useCallback(
+    async (
+      admissionId: number,
+      treatmentId: number,
+      filename: string
+    ): Promise<boolean> => {
+      updateState({ isSubmitting: true, error: null });
+
+      try {
+        await treatmentService.removeAttachment(
+          admissionId,
+          treatmentId,
+          filename
+        );
+        updateState({
+          successMessage: "Attachment removed successfully.",
+          isSubmitting: false,
+        });
+        return true;
+      } catch (err) {
+        if (err instanceof ApiError) {
+          updateState({ error: err.message, isSubmitting: false });
+        } else {
+          updateState({
+            error: "Failed to remove attachment.",
+            isSubmitting: false,
+          });
+        }
+        return false;
       }
     },
     [treatmentService, updateState]
@@ -292,6 +333,7 @@ export function useTreatmentManagement() {
     getTreatment,
     createTreatment,
     updateTreatment,
+    removeAttachment,
     fetchStaff,
     clearError,
     clearSuccess,

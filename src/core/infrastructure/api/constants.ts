@@ -73,6 +73,12 @@ export const API_ENDPOINTS = {
       `/api/admissions/${admissionId}/treatments`,
     UPDATE: (admissionId: number | string, treatmentId: number | string) =>
       `/api/admissions/${admissionId}/treatments/${treatmentId}`,
+    REMOVE_ATTACHMENT: (
+      admissionId: number | string,
+      treatmentId: number | string,
+      filename: string
+    ) =>
+      `/api/admissions/${admissionId}/treatments/${treatmentId}/attachments/${filename}`,
   },
   TREATMENT_OPTIONS: {
     TYPES: "/api/treatment-options/types",

@@ -46,10 +46,15 @@ export class TreatmentManagementService implements ITreatmentService {
    */
   async createTreatment(
     admissionId: number,
-    formData: TreatmentFormDTO
+    formData: TreatmentFormDTO,
+    attachments?: File[]
   ): Promise<TreatmentDetailDTO> {
     const createData = fromTreatmentFormDTO(formData) as CreateTreatmentData;
-    const treatment = await this.repository.create(admissionId, createData);
+    const treatment = await this.repository.create(
+      admissionId,
+      createData,
+      attachments
+    );
     return toTreatmentDetailDTO(treatment);
   }
 
@@ -59,7 +64,8 @@ export class TreatmentManagementService implements ITreatmentService {
   async updateTreatment(
     admissionId: number,
     treatmentId: number,
-    formData: Partial<TreatmentFormDTO>
+    formData: Partial<TreatmentFormDTO>,
+    attachments?: File[]
   ): Promise<TreatmentDetailDTO> {
     const updateData = fromTreatmentFormDTO(
       formData as TreatmentFormDTO
@@ -67,8 +73,20 @@ export class TreatmentManagementService implements ITreatmentService {
     const treatment = await this.repository.update(
       admissionId,
       treatmentId,
-      updateData
+      updateData,
+      attachments
     );
     return toTreatmentDetailDTO(treatment);
+  }
+
+  /**
+   * Remove an attachment from a treatment record
+   */
+  async removeAttachment(
+    admissionId: number,
+    treatmentId: number,
+    filename: string
+  ): Promise<void> {
+    await this.repository.removeAttachment(admissionId, treatmentId, filename);
   }
 }

@@ -3,6 +3,8 @@ import type {
   TreatmentListResponse,
   TreatmentType,
   TreatmentOutcome,
+  TreatmentAttachment,
+  TreatmentAttachmentWithUrl,
 } from "@/core/domain/entities/Treatment";
 import type { StaffDTO } from "./StaffDTO";
 
@@ -45,6 +47,8 @@ export interface TreatmentDetailDTO {
   pre_procedure_notes?: string;
   post_procedure_notes?: string;
   complications?: string;
+  attachments?: TreatmentAttachment[];
+  attachment_urls?: TreatmentAttachmentWithUrl[];
   doctor?: StaffDTO;
   nurse?: StaffDTO;
   created_at?: string;
@@ -131,6 +135,8 @@ export function toTreatmentDetailDTO(treatment: Treatment): TreatmentDetailDTO {
     pre_procedure_notes: treatment.pre_procedure_notes,
     post_procedure_notes: treatment.post_procedure_notes,
     complications: treatment.complications,
+    attachments: treatment.attachments,
+    attachment_urls: treatment.attachment_urls,
     doctor: treatment.doctor
       ? { id: treatment.doctor.id, name: treatment.doctor.name, email: treatment.doctor.email }
       : undefined,
