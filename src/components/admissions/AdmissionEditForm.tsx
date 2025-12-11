@@ -15,6 +15,8 @@ import {
 import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { AddressSelector } from "@/components/common/AddressSelector";
 import { useAddress } from "@/core/presentation/hooks/useAddress";
+import { useDepartments } from "@/core/presentation/hooks/useDepartments";
+import { useWards } from "@/core/presentation/hooks/useWards";
 import type {
   AdmissionDetailDTO,
   AdmissionFormDTO,
@@ -47,6 +49,8 @@ export function AdmissionEditForm({
   canEditAdmin = false,
 }: AdmissionEditFormProps) {
   const { parseAddressJSON, toAddressJSON } = useAddress();
+  const { departmentOptions, isLoading: isLoadingDepartments } = useDepartments();
+  const { wardOptions, getRoomOptionsForWard, isLoading: isLoadingWards } = useWards();
 
   const [formData, setFormData] = useState<Partial<AdmissionFormDTO>>({
     // Admin fields
@@ -193,14 +197,22 @@ export function AdmissionEditForm({
 
           <div>
             <Label htmlFor="service">Service / Department</Label>
-            <Input
-              id="service"
+            <Select
               value={formData.service || ""}
-              onChange={(e) => handleChange("service", e.target.value)}
-              placeholder="e.g., Cardiology, Surgery"
-              className="mt-1.5"
-              disabled={isDischarged || isDeceased}
-            />
+              onValueChange={(value) => handleChange("service", value)}
+              disabled={isDischarged || isDeceased || isLoadingDepartments}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder={isLoadingDepartments ? "Loading departments..." : "Select department"} />
+              </SelectTrigger>
+              <SelectContent>
+                {departmentOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
@@ -250,26 +262,46 @@ export function AdmissionEditForm({
             <>
               <div>
                 <Label htmlFor="ward">Ward</Label>
-                <Input
-                  id="ward"
+                <Select
                   value={formData.ward || ""}
-                  onChange={(e) => handleChange("ward", e.target.value)}
-                  placeholder="e.g., Ward A, ICU"
-                  className="mt-1.5"
-                  disabled={isDischarged || isDeceased}
-                />
+                  onValueChange={(value) => {
+                    handleChange("ward", value);
+                    // Clear bed number when ward changes
+                    handleChange("bed_number", "");
+                  }}
+                  disabled={isDischarged || isDeceased || isLoadingWards}
+                >
+                  <SelectTrigger className="mt-1.5">
+                    <SelectValue placeholder={isLoadingWards ? "Loading wards..." : "Select ward"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {wardOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
-                <Label htmlFor="bed_number">Bed Number</Label>
-                <Input
-                  id="bed_number"
+                <Label htmlFor="bed_number">Room Number</Label>
+                <Select
                   value={formData.bed_number || ""}
-                  onChange={(e) => handleChange("bed_number", e.target.value)}
-                  placeholder="e.g., 12, A-15"
-                  className="mt-1.5"
-                  disabled={isDischarged || isDeceased}
-                />
+                  onValueChange={(value) => handleChange("bed_number", value)}
+                  disabled={isDischarged || isDeceased || !formData.ward || isLoadingWards}
+                >
+                  <SelectTrigger className="mt-1.5">
+                    <SelectValue placeholder={formData.ward ? "Select room" : "Select ward first"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {formData.ward ? getRoomOptionsForWard(formData.ward).map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    )) : null}
+                  </SelectContent>
+                </Select>
               </div>
             </>
           )}

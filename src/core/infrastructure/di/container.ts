@@ -10,6 +10,8 @@ import { ApiStaffRepository } from "@/core/infrastructure/repositories/ApiStaffR
 import { ApiTreatmentRepository } from "@/core/infrastructure/repositories/ApiTreatmentRepository";
 import { ApiAddressRepository } from "@/core/infrastructure/repositories/ApiAddressRepository";
 import { ApiNrcRepository } from "@/core/infrastructure/repositories/ApiNrcRepository";
+import { ApiDepartmentRepository } from "@/core/infrastructure/repositories/ApiDepartmentRepository";
+import { ApiWardRepository } from "@/core/infrastructure/repositories/ApiWardRepository";
 import { PatientManagementService } from "@/core/application/services/PatientManagementService";
 import { DoctorManagementService } from "@/core/application/services/DoctorManagementService";
 import { AppointmentManagementService } from "@/core/application/services/AppointmentManagementService";
@@ -20,6 +22,8 @@ import { StaffManagementService } from "@/core/application/services/StaffManagem
 import { TreatmentManagementService } from "@/core/application/services/TreatmentManagementService";
 import { AddressManagementService } from "@/core/application/services/AddressManagementService";
 import { NrcManagementService } from "@/core/application/services/NrcManagementService";
+import { DepartmentManagementService } from "@/core/application/services/DepartmentManagementService";
+import { WardManagementService } from "@/core/application/services/WardManagementService";
 
 type Factory<T> = () => T;
 
@@ -76,6 +80,8 @@ export const TOKENS = {
   TREATMENT_REPOSITORY: "TREATMENT_REPOSITORY",
   ADDRESS_REPOSITORY: "ADDRESS_REPOSITORY",
   NRC_REPOSITORY: "NRC_REPOSITORY",
+  DEPARTMENT_REPOSITORY: "DEPARTMENT_REPOSITORY",
+  WARD_REPOSITORY: "WARD_REPOSITORY",
 
   // Application services
   AUTH_SERVICE: "AUTH_SERVICE",
@@ -88,6 +94,8 @@ export const TOKENS = {
   TREATMENT_SERVICE: "TREATMENT_SERVICE",
   ADDRESS_SERVICE: "ADDRESS_SERVICE",
   NRC_SERVICE: "NRC_SERVICE",
+  DEPARTMENT_SERVICE: "DEPARTMENT_SERVICE",
+  WARD_SERVICE: "WARD_SERVICE",
 } as const;
 
 export const container = new Container();
@@ -209,6 +217,29 @@ export function setupContainer() {
   container.register(
     TOKENS.NRC_SERVICE,
     () => new NrcManagementService(container.resolve(TOKENS.NRC_REPOSITORY))
+  );
+
+  // Department repositories and services
+  container.register(
+    TOKENS.DEPARTMENT_REPOSITORY,
+    () => new ApiDepartmentRepository(container.resolve(TOKENS.HTTP_CLIENT))
+  );
+  container.register(
+    TOKENS.DEPARTMENT_SERVICE,
+    () =>
+      new DepartmentManagementService(
+        container.resolve(TOKENS.DEPARTMENT_REPOSITORY)
+      )
+  );
+
+  // Ward repositories and services
+  container.register(
+    TOKENS.WARD_REPOSITORY,
+    () => new ApiWardRepository(container.resolve(TOKENS.HTTP_CLIENT))
+  );
+  container.register(
+    TOKENS.WARD_SERVICE,
+    () => new WardManagementService(container.resolve(TOKENS.WARD_REPOSITORY))
   );
 }
 
