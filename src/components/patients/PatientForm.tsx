@@ -58,6 +58,31 @@ const MARITAL_STATUS_OPTIONS: { value: MaritalStatus; label: string }[] = [
   { value: "other", label: "Other" },
 ];
 
+const ETHNIC_GROUP_OPTIONS: { value: string; label: string }[] = [
+  { value: "bamar", label: "Bamar" },
+  { value: "kachin", label: "Kachin" },
+  { value: "kayah", label: "Kayah" },
+  { value: "kayin", label: "Kayin" },
+  { value: "chin", label: "Chin" },
+  { value: "mon", label: "Mon" },
+  { value: "rakhine", label: "Rakhine" },
+  { value: "shan", label: "Shan" },
+  { value: "palaung", label: "Palaung" },
+  { value: "wa", label: "Wa" },
+  { value: "kokang", label: "Kokang" },
+  { value: "karenni", label: "Karenni" },
+  { value: "other", label: "Other" },
+];
+
+const RELIGION_OPTIONS: { value: string; label: string }[] = [
+  { value: "islam", label: "Islam" },
+  { value: "buddhist", label: "Buddhist" },
+  { value: "christian", label: "Christian" },
+  { value: "hindu", label: "Hindu" },
+  { value: "animist", label: "Animist" },
+  { value: "other", label: "Other" },
+];
+
 export function PatientForm({
   initialData,
   onSubmit,
@@ -109,6 +134,12 @@ export function PatientForm({
   );
   const [activeSection, setActiveSection] = useState<string>("basic");
 
+  // Custom ethnic group and religion inputs when "Other" is selected
+  const [customEthnicGroup, setCustomEthnicGroup] = useState<string>("");
+  const [customReligion, setCustomReligion] = useState<string>("");
+  const [isEthnicGroupOther, setIsEthnicGroupOther] = useState<boolean>(false);
+  const [isReligionOther, setIsReligionOther] = useState<boolean>(false);
+
   // Address state
   const [addressComponents, setAddressComponents] =
     useState<AddressComponents | null>(() =>
@@ -119,6 +150,37 @@ export function PatientForm({
   useEffect(() => {
     setFormData(initializeFormData(initialData));
     setAddressComponents(parseAddressJSON(initialData?.permanent_address));
+
+    // Initialize custom ethnic group and religion values
+    if (initialData?.ethnic_group) {
+      const isInOptions = ETHNIC_GROUP_OPTIONS.some(
+        (option) =>
+          option.value.toLowerCase() === initialData.ethnic_group?.toLowerCase()
+      );
+      if (!isInOptions) {
+        setCustomEthnicGroup(initialData.ethnic_group);
+        setIsEthnicGroupOther(true);
+      } else {
+        setIsEthnicGroupOther(false);
+      }
+    } else {
+      setIsEthnicGroupOther(false);
+    }
+
+    if (initialData?.religion) {
+      const isInOptions = RELIGION_OPTIONS.some(
+        (option) =>
+          option.value.toLowerCase() === initialData.religion?.toLowerCase()
+      );
+      if (!isInOptions) {
+        setCustomReligion(initialData.religion);
+        setIsReligionOther(true);
+      } else {
+        setIsReligionOther(false);
+      }
+    } else {
+      setIsReligionOther(false);
+    }
   }, [initialData, parseAddressJSON]);
 
   const handleChange = (
@@ -143,6 +205,44 @@ export function PatientForm({
       ...prev,
       permanent_address: addressJSON || undefined,
     }));
+  };
+
+  const handleEthnicGroupChange = (value: string) => {
+    if (value === "other") {
+      setIsEthnicGroupOther(true);
+      // When "Other" is selected, use the custom value if it exists
+      const finalValue = customEthnicGroup || "Other";
+      handleChange("ethnic_group", finalValue);
+    } else {
+      setIsEthnicGroupOther(false);
+      // Clear custom value when a predefined option is selected
+      setCustomEthnicGroup("");
+      handleChange("ethnic_group", value);
+    }
+  };
+
+  const handleReligionChange = (value: string) => {
+    if (value === "other") {
+      setIsReligionOther(true);
+      // When "Other" is selected, use the custom value if it exists
+      const finalValue = customReligion || "Other";
+      handleChange("religion", finalValue);
+    } else {
+      setIsReligionOther(false);
+      // Clear custom value when a predefined option is selected
+      setCustomReligion("");
+      handleChange("religion", value);
+    }
+  };
+
+  const handleCustomEthnicGroupChange = (value: string) => {
+    setCustomEthnicGroup(value);
+    handleChange("ethnic_group", value || "Other");
+  };
+
+  const handleCustomReligionChange = (value: string) => {
+    setCustomReligion(value);
+    handleChange("religion", value || "Other");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -338,24 +438,78 @@ export function PatientForm({
 
           <div>
             <Label htmlFor="ethnic_group">Ethnic Group</Label>
-            <Input
-              id="ethnic_group"
-              value={formData.ethnic_group || ""}
-              onChange={(e) => handleChange("ethnic_group", e.target.value)}
-              placeholder="e.g., Bamar, Shan"
-              className="mt-1.5"
-            />
+            <Select
+              value={
+                formData.ethnic_group
+                  ? ETHNIC_GROUP_OPTIONS.some(
+                      (option) =>
+                        option.value.toLowerCase() ===
+                        formData.ethnic_group?.toLowerCase()
+                    )
+                    ? formData.ethnic_group.toLowerCase()
+                    : "other"
+                  : ""
+              }
+              onValueChange={handleEthnicGroupChange}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Select ethnic group" />
+              </SelectTrigger>
+              <SelectContent>
+                {ETHNIC_GROUP_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {isEthnicGroupOther && (
+              <Input
+                id="custom_ethnic_group"
+                value={customEthnicGroup}
+                onChange={(e) => handleCustomEthnicGroupChange(e.target.value)}
+                placeholder="Enter custom ethnic group"
+                className="mt-2"
+              />
+            )}
           </div>
 
           <div>
             <Label htmlFor="religion">Religion</Label>
-            <Input
-              id="religion"
-              value={formData.religion || ""}
-              onChange={(e) => handleChange("religion", e.target.value)}
-              placeholder="e.g., Buddhist, Christian"
-              className="mt-1.5"
-            />
+            <Select
+              value={
+                formData.religion
+                  ? RELIGION_OPTIONS.some(
+                      (option) =>
+                        option.value.toLowerCase() ===
+                        formData.religion?.toLowerCase()
+                    )
+                    ? formData.religion.toLowerCase()
+                    : "other"
+                  : ""
+              }
+              onValueChange={handleReligionChange}
+            >
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Select religion" />
+              </SelectTrigger>
+              <SelectContent>
+                {RELIGION_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {isReligionOther && (
+              <Input
+                id="custom_religion"
+                value={customReligion}
+                onChange={(e) => handleCustomReligionChange(e.target.value)}
+                placeholder="Enter custom religion"
+                className="mt-2"
+              />
+            )}
           </div>
 
           <div>
