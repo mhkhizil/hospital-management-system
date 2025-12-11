@@ -112,10 +112,15 @@ export function PatientForm({
     field: keyof PatientFormDTO,
     value: string | number | undefined
   ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value === "" ? undefined : value,
-    }));
+    setFormData((prev) => {
+      const isNameField = field === "name";
+      const nextValue = value === "" ? (isNameField ? "" : undefined) : value;
+
+      return {
+        ...prev,
+        [field]: nextValue,
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -451,7 +456,10 @@ export function PatientForm({
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={isLoading || !formData.name.trim()}>
+        <Button
+          type="submit"
+          disabled={isLoading || !(formData.name || "").trim()}
+        >
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {initialData ? "Update Patient" : "Register Patient"}
         </Button>
