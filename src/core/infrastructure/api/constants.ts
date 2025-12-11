@@ -84,7 +84,5 @@ export const API_ENDPOINTS = {
   ADDRESSES: {
     MYANMAR: "/api/addresses/myanmar",
   },
-  NRC: {
-    CODES: "/api/nrc-codes",
-  },
+
 } as const;

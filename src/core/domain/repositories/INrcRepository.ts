@@ -1,4 +1,4 @@
-import type { NrcCode, Citizenship, NrcCodesResponse } from "../entities/Nrc";
+import type { NrcCodesResponse } from "../entities/Nrc";
 
 /**
  * NRC Repository Interface
