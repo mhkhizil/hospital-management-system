@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { AddressSelector } from "@/components/common/AddressSelector";
 import { NrcSelector } from "@/components/common/NrcSelector";
 import { useAddress } from "@/core/presentation/hooks/useAddress";
@@ -83,6 +83,35 @@ const RELIGION_OPTIONS: { value: string; label: string }[] = [
   { value: "other", label: "Other" },
 ];
 
+// Helper component for labels with required indicator
+const FormLabel = ({
+  htmlFor,
+  children,
+  required = false,
+  optional = false,
+}: {
+  htmlFor?: string;
+  children: React.ReactNode;
+  required?: boolean;
+  optional?: boolean;
+}) => {
+  return (
+    <Label htmlFor={htmlFor} className="flex items-center gap-1">
+      {children}
+      {required && (
+        <span className="text-destructive font-semibold" aria-label="required">
+          *
+        </span>
+      )}
+      {optional && (
+        <span className="text-xs text-muted-foreground font-normal ml-1">
+          (Optional)
+        </span>
+      )}
+    </Label>
+  );
+};
+
 export function PatientForm({
   initialData,
   onSubmit,
@@ -133,6 +162,7 @@ export function PatientForm({
     initializeFormData(initialData)
   );
   const [activeSection, setActiveSection] = useState<string>("basic");
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   // Custom ethnic group and religion inputs when "Other" is selected
   const [customEthnicGroup, setCustomEthnicGroup] = useState<string>("");
@@ -245,23 +275,73 @@ export function PatientForm({
     handleChange("religion", value || "Other");
   };
 
+  // Validation helper
+  const validateRequiredFields = (): string[] => {
+    const errors: string[] = [];
+
+    if (!formData.name?.trim()) errors.push("Full Name is required");
+    if (!formData.nrc_number?.trim()) errors.push("NRC Number is required");
+    if (!formData.sex) errors.push("Sex is required");
+    if (formData.age === undefined || formData.age === null)
+      errors.push("Age is required");
+    if (!formData.dob) errors.push("Date of Birth is required");
+    if (!formData.contact_phone?.trim())
+      errors.push("Contact Phone is required");
+    if (!formData.permanent_address)
+      errors.push("Permanent Address is required");
+    if (!formData.marital_status) errors.push("Marital Status is required");
+    if (!formData.occupation?.trim()) errors.push("Occupation is required");
+    if (!formData.father_name?.trim()) errors.push("Father's Name is required");
+    if (!formData.mother_name?.trim()) errors.push("Mother's Name is required");
+    if (!formData.nearest_relative_name?.trim())
+      errors.push("Emergency Contact Name is required");
+    if (!formData.nearest_relative_phone?.trim())
+      errors.push("Emergency Contact Phone is required");
+    if (!formData.relationship?.trim()) errors.push("Relationship is required");
+    if (!formData.blood_type) errors.push("Blood Type is required");
+
+    return errors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate required fields
-    if (!formData.name?.trim()) {
-      // This validation could be enhanced with proper error display
+    // Validate all required fields
+    const errors = validateRequiredFields();
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      // Scroll to top to show errors
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
-    if (!formData.nrc_number?.trim()) {
-      // This validation could be enhanced with proper error display
-      return;
-    }
-
+    // Clear errors if validation passes
+    setValidationErrors([]);
     await onSubmit(formData);
     // Note: If update fails, error is handled by parent component
     // We keep user's form data so they can fix any issues and retry
+  };
+
+  // Helper to check if all required fields are filled
+  const isFormValid = (): boolean => {
+    return (
+      !!(formData.name || "").trim() &&
+      !!(formData.nrc_number || "").trim() &&
+      !!formData.sex &&
+      formData.age !== undefined &&
+      formData.age !== null &&
+      !!formData.dob &&
+      !!(formData.contact_phone || "").trim() &&
+      !!formData.permanent_address &&
+      !!formData.marital_status &&
+      !!(formData.occupation || "").trim() &&
+      !!(formData.father_name || "").trim() &&
+      !!(formData.mother_name || "").trim() &&
+      !!(formData.nearest_relative_name || "").trim() &&
+      !!(formData.nearest_relative_phone || "").trim() &&
+      !!(formData.relationship || "").trim() &&
+      !!formData.blood_type
+    );
   };
 
   const sections = [
@@ -273,6 +353,58 @@ export function PatientForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Validation Errors */}
+      {validationErrors.length > 0 && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-destructive mb-2">
+                Please fill in all required fields:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm text-destructive/90">
+                {validationErrors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Required Fields Notice */}
+      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div className="flex items-start gap-2">
+          <div className="flex-shrink-0 mt-0.5">
+            <svg
+              className="h-5 w-5 text-blue-600 dark:text-blue-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+              Field Requirements
+            </p>
+            <p className="text-xs text-blue-700 dark:text-blue-300">
+              Fields marked with{" "}
+              <span className="text-destructive font-semibold">*</span> are
+              required. Fields labeled{" "}
+              <span className="text-muted-foreground">(Optional)</span> can be
+              left blank.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Section Tabs */}
       <div className="flex flex-wrap gap-2 border-b pb-4">
         {sections.map((section) => (
@@ -295,7 +427,9 @@ export function PatientForm({
       {activeSection === "basic" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <Label htmlFor="name">Full Name *</Label>
+            <FormLabel htmlFor="name" required>
+              Full Name
+            </FormLabel>
             <Input
               id="name"
               value={formData.name}
@@ -316,18 +450,23 @@ export function PatientForm({
           </div>
 
           <div>
-            <Label htmlFor="contact_phone">Contact Phone</Label>
+            <FormLabel htmlFor="contact_phone" required>
+              Contact Phone
+            </FormLabel>
             <Input
               id="contact_phone"
               value={formData.contact_phone || ""}
               onChange={(e) => handleChange("contact_phone", e.target.value)}
               placeholder="e.g., 09123456789"
+              required
               className="mt-1.5"
             />
           </div>
 
           <div>
-            <Label htmlFor="sex">Sex</Label>
+            <FormLabel htmlFor="sex" required>
+              Sex
+            </FormLabel>
             <Select
               value={formData.sex}
               onValueChange={(value) =>
@@ -348,7 +487,9 @@ export function PatientForm({
           </div>
 
           <div>
-            <Label htmlFor="age">Age</Label>
+            <FormLabel htmlFor="age" required>
+              Age
+            </FormLabel>
             <Input
               id="age"
               type="number"
@@ -362,24 +503,30 @@ export function PatientForm({
                 )
               }
               placeholder="Enter age"
+              required
               className="mt-1.5"
             />
           </div>
 
           <div>
-            <Label htmlFor="dob">Date of Birth</Label>
+            <FormLabel htmlFor="dob" required>
+              Date of Birth
+            </FormLabel>
             <Input
               id="dob"
               type="date"
               value={formData.dob || ""}
               onChange={(e) => handleChange("dob", e.target.value)}
               max={new Date().toISOString().split("T")[0]}
+              required
               className="mt-1.5"
             />
           </div>
 
           <div>
-            <Label htmlFor="blood_type">Blood Type</Label>
+            <FormLabel htmlFor="blood_type" required>
+              Blood Type
+            </FormLabel>
             <Select
               value={formData.blood_type}
               onValueChange={(value) =>
@@ -405,7 +552,9 @@ export function PatientForm({
       {activeSection === "personal" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="marital_status">Marital Status</Label>
+            <FormLabel htmlFor="marital_status" required>
+              Marital Status
+            </FormLabel>
             <Select
               value={formData.marital_status}
               onValueChange={(value) =>
@@ -426,18 +575,23 @@ export function PatientForm({
           </div>
 
           <div>
-            <Label htmlFor="occupation">Occupation</Label>
+            <FormLabel htmlFor="occupation" required>
+              Occupation
+            </FormLabel>
             <Input
               id="occupation"
               value={formData.occupation || ""}
               onChange={(e) => handleChange("occupation", e.target.value)}
               placeholder="Enter occupation"
+              required
               className="mt-1.5"
             />
           </div>
 
           <div>
-            <Label htmlFor="ethnic_group">Ethnic Group</Label>
+            <FormLabel htmlFor="ethnic_group" optional>
+              Ethnic Group
+            </FormLabel>
             <Select
               value={
                 formData.ethnic_group
@@ -475,7 +629,9 @@ export function PatientForm({
           </div>
 
           <div>
-            <Label htmlFor="religion">Religion</Label>
+            <FormLabel htmlFor="religion" optional>
+              Religion
+            </FormLabel>
             <Select
               value={
                 formData.religion
@@ -513,23 +669,29 @@ export function PatientForm({
           </div>
 
           <div>
-            <Label htmlFor="father_name">Father's Name</Label>
+            <FormLabel htmlFor="father_name" required>
+              Father's Name
+            </FormLabel>
             <Input
               id="father_name"
               value={formData.father_name || ""}
               onChange={(e) => handleChange("father_name", e.target.value)}
               placeholder="Enter father's name"
+              required
               className="mt-1.5"
             />
           </div>
 
           <div>
-            <Label htmlFor="mother_name">Mother's Name</Label>
+            <FormLabel htmlFor="mother_name" required>
+              Mother's Name
+            </FormLabel>
             <Input
               id="mother_name"
               value={formData.mother_name || ""}
               onChange={(e) => handleChange("mother_name", e.target.value)}
               placeholder="Enter mother's name"
+              required
               className="mt-1.5"
             />
           </div>
@@ -539,6 +701,7 @@ export function PatientForm({
               value={addressComponents}
               onChange={handleAddressChange}
               label="Permanent Address"
+              required
             />
           </div>
         </div>
@@ -554,7 +717,9 @@ export function PatientForm({
           </div>
 
           <div>
-            <Label htmlFor="nearest_relative_name">Contact Person Name</Label>
+            <FormLabel htmlFor="nearest_relative_name" required>
+              Contact Person Name
+            </FormLabel>
             <Input
               id="nearest_relative_name"
               value={formData.nearest_relative_name || ""}
@@ -562,12 +727,15 @@ export function PatientForm({
                 handleChange("nearest_relative_name", e.target.value)
               }
               placeholder="Emergency contact name"
+              required
               className="mt-1.5"
             />
           </div>
 
           <div>
-            <Label htmlFor="nearest_relative_phone">Contact Person Phone</Label>
+            <FormLabel htmlFor="nearest_relative_phone" required>
+              Contact Person Phone
+            </FormLabel>
             <Input
               id="nearest_relative_phone"
               value={formData.nearest_relative_phone || ""}
@@ -575,17 +743,21 @@ export function PatientForm({
                 handleChange("nearest_relative_phone", e.target.value)
               }
               placeholder="Emergency contact phone"
+              required
               className="mt-1.5"
             />
           </div>
 
           <div>
-            <Label htmlFor="relationship">Relationship</Label>
+            <FormLabel htmlFor="relationship" required>
+              Relationship
+            </FormLabel>
             <Input
               id="relationship"
               value={formData.relationship || ""}
               onChange={(e) => handleChange("relationship", e.target.value)}
               placeholder="e.g., spouse, parent, sibling"
+              required
               className="mt-1.5"
             />
           </div>
@@ -596,7 +768,9 @@ export function PatientForm({
       {activeSection === "medical" && (
         <div className="grid grid-cols-1 gap-4">
           <div>
-            <Label htmlFor="known_allergies">Known Allergies</Label>
+            <FormLabel htmlFor="known_allergies" optional>
+              Known Allergies
+            </FormLabel>
             <Input
               id="known_allergies"
               value={formData.known_allergies || ""}
@@ -610,7 +784,9 @@ export function PatientForm({
           </div>
 
           <div>
-            <Label htmlFor="chronic_conditions">Chronic Conditions</Label>
+            <FormLabel htmlFor="chronic_conditions" optional>
+              Chronic Conditions
+            </FormLabel>
             <Input
               id="chronic_conditions"
               value={formData.chronic_conditions || ""}
@@ -637,14 +813,7 @@ export function PatientForm({
         >
           Cancel
         </Button>
-        <Button
-          type="submit"
-          disabled={
-            isLoading ||
-            !(formData.name || "").trim() ||
-            !(formData.nrc_number || "").trim()
-          }
-        >
+        <Button type="submit" disabled={isLoading || !isFormValid()}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {initialData ? "Update Patient" : "Register Patient"}
         </Button>
