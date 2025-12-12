@@ -41,6 +41,35 @@ const POLICE_CASE_OPTIONS = [
   { value: "yes", label: "Yes" },
 ];
 
+// Helper component for labels with required indicator
+const FormLabel = ({
+  htmlFor,
+  children,
+  required = false,
+  optional = false,
+}: {
+  htmlFor?: string;
+  children: React.ReactNode;
+  required?: boolean;
+  optional?: boolean;
+}) => {
+  return (
+    <Label htmlFor={htmlFor} className="flex items-center gap-1">
+      {children}
+      {required && (
+        <span className="text-destructive font-semibold" aria-label="required">
+          *
+        </span>
+      )}
+      {optional && (
+        <span className="text-xs text-muted-foreground font-normal ml-1">
+          (Optional)
+        </span>
+      )}
+    </Label>
+  );
+};
+
 export function AdmissionForm({
   patient,
   doctors,
@@ -78,7 +107,7 @@ export function AdmissionForm({
   });
 
   const [activeSection, setActiveSection] = useState<string>("basic");
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   // Address state
   const [addressComponents, setAddressComponents] =
@@ -105,7 +134,10 @@ export function AdmissionForm({
       ...prev,
       [field]: value === "" ? undefined : value,
     }));
-    setValidationError(null);
+    // Clear validation errors when user makes changes
+    if (validationErrors.length > 0) {
+      setValidationErrors([]);
+    }
   };
 
   const handleAddressChange = (address: AddressComponents | null) => {
@@ -117,28 +149,84 @@ export function AdmissionForm({
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setValidationError(null);
+  // Validation helper
+  const validateRequiredFields = (): string[] => {
+    const errors: string[] = [];
 
-    // Validate required fields
+    if (!formData.admission_type) {
+      errors.push("Admission Type is required");
+    }
     if (!formData.admission_date) {
-      setValidationError("Admission date is required");
-      return;
+      errors.push("Admission Date is required");
+    }
+    if (!formData.admission_time) {
+      errors.push("Admission Time is required");
     }
     if (!formData.admitted_for?.trim()) {
-      setValidationError("Reason for admission is required");
-      return;
+      errors.push("Reason for Admission is required");
     }
     if (!formData.service?.trim()) {
-      setValidationError("Service/Department is required");
-      return;
+      errors.push("Service/Department is required");
     }
-    if (!isOutpatient && !formData.ward?.trim()) {
-      setValidationError("Ward is required for inpatient admissions");
+    if (!formData.doctor_id) {
+      errors.push("Assigned Doctor is required");
+    }
+    if (!formData.nurse_id) {
+      errors.push("Assigned Nurse is required");
+    }
+    if (!formData.present_address) {
+      errors.push("Present Address is required");
+    }
+    if (!formData.police_case) {
+      errors.push("Police Case is required");
+    }
+    if (!formData.initial_diagnosis?.trim()) {
+      errors.push("Initial Diagnosis is required");
+    }
+
+    // Conditional validation for inpatient
+    if (!isOutpatient) {
+      if (!formData.ward?.trim()) {
+        errors.push("Ward is required for inpatient admissions");
+      }
+      if (!formData.bed_number?.trim()) {
+        errors.push("Room Number is required for inpatient admissions");
+      }
+    }
+
+    // Validate that ward/bed are NOT set for outpatient
+    if (isOutpatient) {
+      if (formData.ward?.trim()) {
+        errors.push("Ward should not be set for outpatient visits");
+      }
+      if (formData.bed_number?.trim()) {
+        errors.push("Room Number should not be set for outpatient visits");
+      }
+    }
+
+    return errors;
+  };
+
+  // Helper to check if all required fields are filled
+  const isFormValid = (): boolean => {
+    const errors = validateRequiredFields();
+    return errors.length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate all required fields
+    const errors = validateRequiredFields();
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      // Scroll to top to show errors
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
+    // Clear errors if validation passes
+    setValidationErrors([]);
     await onSubmit(formData);
   };
 
@@ -172,13 +260,58 @@ export function AdmissionForm({
         </div>
       </div>
 
-      {/* Validation Error */}
-      {validationError && (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
-          {validationError}
+      {/* Validation Errors */}
+      {validationErrors.length > 0 && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-destructive mb-2">
+                Please fill in all required fields:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm text-destructive/90">
+                {validationErrors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       )}
+
+      {/* Required Fields Notice */}
+      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div className="flex items-start gap-2">
+          <div className="flex-shrink-0 mt-0.5">
+            <svg
+              className="h-5 w-5 text-blue-600 dark:text-blue-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+              Field Requirements
+            </p>
+            <p className="text-xs text-blue-700 dark:text-blue-300">
+              Fields marked with{" "}
+              <span className="text-destructive font-semibold">*</span> are
+              required. Fields labeled{" "}
+              <span className="text-muted-foreground">(Optional)</span> can be
+              left blank. Ward and Room Number are required for inpatient
+              admissions only.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Section Tabs */}
       <div className="flex flex-wrap gap-2 border-b pb-4">
@@ -202,7 +335,9 @@ export function AdmissionForm({
       {activeSection === "basic" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="admission_type">Admission Type *</Label>
+            <FormLabel htmlFor="admission_type" required>
+              Admission Type
+            </FormLabel>
             <Select
               value={formData.admission_type}
               onValueChange={(value) => handleChange("admission_type", value)}
@@ -221,7 +356,9 @@ export function AdmissionForm({
           </div>
 
           <div>
-            <Label htmlFor="admission_date">Admission Date *</Label>
+            <FormLabel htmlFor="admission_date" required>
+              Admission Date
+            </FormLabel>
             <Input
               id="admission_date"
               type="date"
@@ -234,18 +371,23 @@ export function AdmissionForm({
           </div>
 
           <div>
-            <Label htmlFor="admission_time">Admission Time</Label>
+            <FormLabel htmlFor="admission_time" required>
+              Admission Time
+            </FormLabel>
             <Input
               id="admission_time"
               type="time"
               value={formData.admission_time || ""}
               onChange={(e) => handleChange("admission_time", e.target.value)}
+              required
               className="mt-1.5"
             />
           </div>
 
           <div>
-            <Label htmlFor="service">Service / Department *</Label>
+            <FormLabel htmlFor="service" required>
+              Service / Department
+            </FormLabel>
             <Select
               value={formData.service || ""}
               onValueChange={(value) => handleChange("service", value)}
@@ -271,7 +413,9 @@ export function AdmissionForm({
           </div>
 
           <div className="md:col-span-2">
-            <Label htmlFor="admitted_for">Reason for Admission *</Label>
+            <FormLabel htmlFor="admitted_for" required>
+              Reason for Admission
+            </FormLabel>
             <Textarea
               id="admitted_for"
               value={formData.admitted_for}
@@ -297,7 +441,9 @@ export function AdmissionForm({
           ) : (
             <>
               <div>
-                <Label htmlFor="ward">Ward *</Label>
+                <FormLabel htmlFor="ward" required>
+                  Ward
+                </FormLabel>
                 <Select
                   value={formData.ward || ""}
                   onValueChange={(value) => {
@@ -325,7 +471,9 @@ export function AdmissionForm({
               </div>
 
               <div>
-                <Label htmlFor="bed_number">Room Number</Label>
+                <FormLabel htmlFor="bed_number" required>
+                  Room Number
+                </FormLabel>
                 <Select
                   value={formData.bed_number || ""}
                   onValueChange={(value) => handleChange("bed_number", value)}
@@ -357,11 +505,14 @@ export function AdmissionForm({
               value={addressComponents}
               onChange={handleAddressChange}
               label="Present Address"
+              required
             />
           </div>
 
           <div>
-            <Label htmlFor="referred_by">Referred By</Label>
+            <FormLabel htmlFor="referred_by" optional>
+              Referred By
+            </FormLabel>
             <Input
               id="referred_by"
               value={formData.referred_by || ""}
@@ -372,7 +523,9 @@ export function AdmissionForm({
           </div>
 
           <div>
-            <Label htmlFor="police_case">Police Case</Label>
+            <FormLabel htmlFor="police_case" required>
+              Police Case
+            </FormLabel>
             <Select
               value={formData.police_case || "no"}
               onValueChange={(value) => handleChange("police_case", value)}
@@ -396,7 +549,9 @@ export function AdmissionForm({
       {activeSection === "staff" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="doctor_id">Assigned Doctor</Label>
+            <FormLabel htmlFor="doctor_id" required>
+              Assigned Doctor
+            </FormLabel>
             <Select
               value={formData.doctor_id?.toString() || ""}
               onValueChange={(value) =>
@@ -417,7 +572,9 @@ export function AdmissionForm({
           </div>
 
           <div>
-            <Label htmlFor="nurse_id">Assigned Nurse</Label>
+            <FormLabel htmlFor="nurse_id" required>
+              Assigned Nurse
+            </FormLabel>
             <Select
               value={formData.nurse_id?.toString() || ""}
               onValueChange={(value) =>
@@ -438,7 +595,9 @@ export function AdmissionForm({
           </div>
 
           <div>
-            <Label htmlFor="medical_officer">Medical Officer</Label>
+            <FormLabel htmlFor="medical_officer" optional>
+              Medical Officer
+            </FormLabel>
             <Input
               id="medical_officer"
               value={formData.medical_officer || ""}
@@ -454,7 +613,9 @@ export function AdmissionForm({
       {activeSection === "medical" && (
         <div className="grid grid-cols-1 gap-4">
           <div>
-            <Label htmlFor="initial_diagnosis">Initial Diagnosis</Label>
+            <FormLabel htmlFor="initial_diagnosis" required>
+              Initial Diagnosis
+            </FormLabel>
             <Textarea
               id="initial_diagnosis"
               value={formData.initial_diagnosis || ""}
@@ -462,13 +623,16 @@ export function AdmissionForm({
                 handleChange("initial_diagnosis", e.target.value)
               }
               placeholder="Initial diagnosis / assessment"
+              required
               className="mt-1.5"
               rows={2}
             />
           </div>
 
           <div>
-            <Label htmlFor="drug_allergy_noted">Drug Allergies</Label>
+            <FormLabel htmlFor="drug_allergy_noted" optional>
+              Drug Allergies
+            </FormLabel>
             <Input
               id="drug_allergy_noted"
               value={formData.drug_allergy_noted || ""}
@@ -484,7 +648,9 @@ export function AdmissionForm({
           </div>
 
           <div>
-            <Label htmlFor="remarks">Remarks</Label>
+            <FormLabel htmlFor="remarks" optional>
+              Remarks
+            </FormLabel>
             <Textarea
               id="remarks"
               value={formData.remarks || ""}
@@ -507,7 +673,7 @@ export function AdmissionForm({
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading || !isFormValid()}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isOutpatient ? "Create Visit" : "Admit Patient"}
         </Button>

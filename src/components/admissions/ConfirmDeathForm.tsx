@@ -15,6 +15,28 @@ import { Loader2, AlertCircle, Skull, AlertTriangle } from "lucide-react";
 import type { ConfirmDeathFormDTO } from "@/core/application/dtos/AdmissionDTO";
 import type { AdmissionDetailDTO } from "@/core/application/dtos/AdmissionDTO";
 
+// Helper component for labels with required indicator
+const FormLabel = ({
+  htmlFor,
+  children,
+  required = false,
+}: {
+  htmlFor?: string;
+  children: React.ReactNode;
+  required?: boolean;
+}) => {
+  return (
+    <Label htmlFor={htmlFor} className="flex items-center gap-1">
+      {children}
+      {required && (
+        <span className="text-destructive font-semibold" aria-label="required">
+          *
+        </span>
+      )}
+    </Label>
+  );
+};
+
 interface ConfirmDeathFormProps {
   admission: AdmissionDetailDTO;
   onSubmit: (data: ConfirmDeathFormDTO) => Promise<void>;
@@ -41,7 +63,7 @@ export function ConfirmDeathForm({
     certified_by: "",
   });
 
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [confirmed, setConfirmed] = useState(false);
 
   const handleChange = (field: keyof ConfirmDeathFormDTO, value: string) => {
@@ -49,23 +71,55 @@ export function ConfirmDeathForm({
       ...prev,
       [field]: value,
     }));
-    setValidationError(null);
+    // Clear validation errors when user makes changes
+    if (validationErrors.length > 0) {
+      setValidationErrors([]);
+    }
+  };
+
+  // Validation helper
+  const validateRequiredFields = (): string[] => {
+    const errors: string[] = [];
+
+    if (!formData.cause_of_death?.trim()) {
+      errors.push("Cause of Death is required");
+    }
+    if (!formData.time_of_death) {
+      errors.push("Time of Death is required");
+    }
+    if (!formData.autopsy) {
+      errors.push("Autopsy status is required");
+    }
+    if (!formData.certified_by?.trim()) {
+      errors.push("Certified By is required");
+    }
+    if (!confirmed) {
+      errors.push("Please confirm this action by checking the confirmation box");
+    }
+
+    return errors;
+  };
+
+  // Helper to check if all required fields are filled
+  const isFormValid = (): boolean => {
+    const errors = validateRequiredFields();
+    return errors.length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setValidationError(null);
 
-    if (!formData.cause_of_death.trim()) {
-      setValidationError("Cause of death is required");
+    // Validate all required fields
+    const errors = validateRequiredFields();
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      // Scroll to top to show errors
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
-    if (!confirmed) {
-      setValidationError("Please confirm this action by checking the confirmation box");
-      return;
-    }
-
+    // Clear errors if validation passes
+    setValidationErrors([]);
     await onSubmit(formData);
   };
 
@@ -98,18 +152,62 @@ export function ConfirmDeathForm({
         </div>
       </div>
 
-      {/* Validation Error */}
-      {validationError && (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
-          {validationError}
+      {/* Validation Errors */}
+      {validationErrors.length > 0 && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-destructive mb-2">
+                Please fill in all required fields:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm text-destructive/90">
+                {validationErrors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       )}
+
+      {/* Required Fields Notice */}
+      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div className="flex items-start gap-2">
+          <div className="flex-shrink-0 mt-0.5">
+            <svg
+              className="h-5 w-5 text-blue-600 dark:text-blue-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+              All Fields Required
+            </p>
+            <p className="text-xs text-blue-700 dark:text-blue-300">
+              All fields marked with{" "}
+              <span className="text-destructive font-semibold">*</span> are
+              required for death confirmation documentation.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Form Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="md:col-span-2">
-          <Label htmlFor="cause_of_death">Cause of Death *</Label>
+          <FormLabel htmlFor="cause_of_death" required>
+            Cause of Death
+          </FormLabel>
           <Input
             id="cause_of_death"
             value={formData.cause_of_death}
@@ -121,19 +219,24 @@ export function ConfirmDeathForm({
         </div>
 
         <div>
-          <Label htmlFor="time_of_death">Time of Death</Label>
+          <FormLabel htmlFor="time_of_death" required>
+            Time of Death
+          </FormLabel>
           <Input
             id="time_of_death"
             type="datetime-local"
             value={formData.time_of_death || ""}
             onChange={(e) => handleChange("time_of_death", e.target.value)}
             max={new Date().toISOString().slice(0, 16)}
+            required
             className="mt-1.5"
           />
         </div>
 
         <div>
-          <Label htmlFor="autopsy">Autopsy</Label>
+          <FormLabel htmlFor="autopsy" required>
+            Autopsy
+          </FormLabel>
           <Select
             value={formData.autopsy || "pending"}
             onValueChange={(value) => handleChange("autopsy", value)}
@@ -152,12 +255,15 @@ export function ConfirmDeathForm({
         </div>
 
         <div className="md:col-span-2">
-          <Label htmlFor="certified_by">Certified By</Label>
+          <FormLabel htmlFor="certified_by" required>
+            Certified By
+          </FormLabel>
           <Input
             id="certified_by"
             value={formData.certified_by || ""}
             onChange={(e) => handleChange("certified_by", e.target.value)}
             placeholder="Name of certifying doctor"
+            required
             className="mt-1.5"
           />
         </div>
@@ -191,7 +297,7 @@ export function ConfirmDeathForm({
         <Button 
           type="submit" 
           variant="destructive" 
-          disabled={isLoading || !confirmed}
+          disabled={isLoading || !isFormValid()}
         >
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Confirm Death
