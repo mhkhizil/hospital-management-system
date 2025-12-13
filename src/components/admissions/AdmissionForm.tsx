@@ -158,11 +158,16 @@ export function AdmissionForm({
       }
     }
 
-    // Update field errors
-    setFieldErrors((prev) => ({
-      ...prev,
-      [field]: formatError || undefined,
-    }));
+    // Update field errors (remove key if no error, otherwise set error message)
+    setFieldErrors((prev) => {
+      const newErrors = { ...prev };
+      if (formatError) {
+        newErrors[field] = formatError;
+      } else {
+        delete newErrors[field];
+      }
+      return newErrors;
+    });
 
     // Clear validation errors when user makes changes
     if (validationErrors.length > 0) {
