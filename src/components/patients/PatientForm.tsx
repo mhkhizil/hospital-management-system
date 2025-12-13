@@ -283,11 +283,16 @@ export function PatientForm({
         formatError = validateAge(nextValue);
       }
 
-      // Update field errors
-      setFieldErrors((prev) => ({
-        ...prev,
-        [field]: formatError || undefined,
-      }));
+      // Update field errors (remove key if no error, otherwise set error message)
+      setFieldErrors((prev) => {
+        const newErrors = { ...prev };
+        if (formatError) {
+          newErrors[field] = formatError;
+        } else {
+          delete newErrors[field];
+        }
+        return newErrors;
+      });
 
       return {
         ...prev,
@@ -444,7 +449,7 @@ export function PatientForm({
       formData.age !== null &&
       !!formData.dob &&
       !!(formData.contact_phone || "").trim() &&
-      !!formData.permanent_address &&
+      !!(formData.permanent_address || "").trim() &&
       !!formData.marital_status &&
       !!(formData.occupation || "").trim() &&
       !!(formData.father_name || "").trim() &&
@@ -648,10 +653,15 @@ export function PatientForm({
                 const value = e.target.value;
                 if (value && formData.age !== undefined) {
                   const error = validateAge(formData.age);
-                  setFieldErrors((prev) => ({
-                    ...prev,
-                    age: error || undefined,
-                  }));
+                  setFieldErrors((prev) => {
+                    const newErrors = { ...prev };
+                    if (error) {
+                      newErrors.age = error;
+                    } else {
+                      delete newErrors.age;
+                    }
+                    return newErrors;
+                  });
                 }
               }}
               placeholder="Enter age"
