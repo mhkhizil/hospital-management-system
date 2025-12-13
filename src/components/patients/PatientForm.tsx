@@ -163,6 +163,44 @@ export function PatientForm({
   );
   const [activeSection, setActiveSection] = useState<string>("basic");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<keyof PatientFormDTO, string>>
+  >({});
+
+  // Validation helper functions
+  const validateNameField = (value: string): string | null => {
+    if (!value.trim()) return null; // Empty is handled by required validation
+    // Allow: letters (Unicode), spaces, hyphens, apostrophes, periods
+    const namePattern = /^[\p{L}\s\-'.]+$/u;
+    if (!namePattern.test(value)) {
+      return "Only letters, spaces, hyphens (-), apostrophes ('), and periods (.) are allowed";
+    }
+    return null;
+  };
+
+  const validatePhoneField = (value: string): string | null => {
+    if (!value.trim()) return null; // Empty is handled by required validation
+    // Allow: digits, spaces, plus signs, hyphens, parentheses
+    const phonePattern = /^[\d\s+\-()]+$/;
+    if (!phonePattern.test(value)) {
+      return "Only digits, spaces, plus signs (+), hyphens (-), and parentheses () are allowed";
+    }
+    return null;
+  };
+
+  const validateAge = (value: number | undefined): string | null => {
+    if (value === undefined || value === null) return null; // Empty is handled by required validation
+    if (!Number.isInteger(value)) {
+      return "Age must be a whole number";
+    }
+    if (value < 0) {
+      return "Age cannot be negative";
+    }
+    if (value > 150) {
+      return "Age cannot be greater than 150";
+    }
+    return null;
+  };
 
   // Custom ethnic group and religion inputs when "Other" is selected
   const [customEthnicGroup, setCustomEthnicGroup] = useState<string>("");
@@ -221,11 +259,45 @@ export function PatientForm({
       const isNameField = field === "name";
       const nextValue = value === "" ? (isNameField ? "" : undefined) : value;
 
+      // Validate field format in real-time
+      let formatError: string | null = null;
+      if (typeof nextValue === "string" && nextValue.trim()) {
+        // Name fields validation
+        if (
+          [
+            "name",
+            "father_name",
+            "mother_name",
+            "nearest_relative_name",
+            "occupation",
+            "relationship",
+          ].includes(field)
+        ) {
+          formatError = validateNameField(nextValue);
+        }
+        // Phone fields validation
+        if (["contact_phone", "nearest_relative_phone"].includes(field)) {
+          formatError = validatePhoneField(nextValue);
+        }
+      } else if (typeof nextValue === "number" && field === "age") {
+        formatError = validateAge(nextValue);
+      }
+
+      // Update field errors
+      setFieldErrors((prev) => ({
+        ...prev,
+        [field]: formatError || undefined,
+      }));
+
       return {
         ...prev,
         [field]: nextValue,
       };
     });
+    // Clear validation errors when user makes changes
+    if (validationErrors.length > 0) {
+      setValidationErrors([]);
+    }
   };
 
   const handleAddressChange = (address: AddressComponents | null) => {
@@ -279,6 +351,7 @@ export function PatientForm({
   const validateRequiredFields = (): string[] => {
     const errors: string[] = [];
 
+    // Required field validation
     if (!formData.name?.trim()) errors.push("Full Name is required");
     if (!formData.nrc_number?.trim()) errors.push("NRC Number is required");
     if (!formData.sex) errors.push("Sex is required");
@@ -300,6 +373,44 @@ export function PatientForm({
     if (!formData.relationship?.trim()) errors.push("Relationship is required");
     if (!formData.blood_type) errors.push("Blood Type is required");
 
+    // Format validation
+    if (formData.name?.trim()) {
+      const nameError = validateNameField(formData.name);
+      if (nameError) errors.push(`Full Name: ${nameError}`);
+    }
+    if (formData.father_name?.trim()) {
+      const nameError = validateNameField(formData.father_name);
+      if (nameError) errors.push(`Father's Name: ${nameError}`);
+    }
+    if (formData.mother_name?.trim()) {
+      const nameError = validateNameField(formData.mother_name);
+      if (nameError) errors.push(`Mother's Name: ${nameError}`);
+    }
+    if (formData.nearest_relative_name?.trim()) {
+      const nameError = validateNameField(formData.nearest_relative_name);
+      if (nameError) errors.push(`Emergency Contact Name: ${nameError}`);
+    }
+    if (formData.occupation?.trim()) {
+      const nameError = validateNameField(formData.occupation);
+      if (nameError) errors.push(`Occupation: ${nameError}`);
+    }
+    if (formData.relationship?.trim()) {
+      const nameError = validateNameField(formData.relationship);
+      if (nameError) errors.push(`Relationship: ${nameError}`);
+    }
+    if (formData.contact_phone?.trim()) {
+      const phoneError = validatePhoneField(formData.contact_phone);
+      if (phoneError) errors.push(`Contact Phone: ${phoneError}`);
+    }
+    if (formData.nearest_relative_phone?.trim()) {
+      const phoneError = validatePhoneField(formData.nearest_relative_phone);
+      if (phoneError) errors.push(`Emergency Contact Phone: ${phoneError}`);
+    }
+    if (formData.age !== undefined && formData.age !== null) {
+      const ageError = validateAge(formData.age);
+      if (ageError) errors.push(`Age: ${ageError}`);
+    }
+
     return errors;
   };
 
@@ -317,14 +428,15 @@ export function PatientForm({
 
     // Clear errors if validation passes
     setValidationErrors([]);
+    setFieldErrors({});
     await onSubmit(formData);
     // Note: If update fails, error is handled by parent component
     // We keep user's form data so they can fix any issues and retry
   };
 
-  // Helper to check if all required fields are filled
+  // Helper to check if all required fields are filled and valid
   const isFormValid = (): boolean => {
-    return (
+    const hasRequiredFields =
       !!(formData.name || "").trim() &&
       !!(formData.nrc_number || "").trim() &&
       !!formData.sex &&
@@ -340,8 +452,12 @@ export function PatientForm({
       !!(formData.nearest_relative_name || "").trim() &&
       !!(formData.nearest_relative_phone || "").trim() &&
       !!(formData.relationship || "").trim() &&
-      !!formData.blood_type
-    );
+      !!formData.blood_type;
+
+    // Check if there are any format errors
+    const hasFormatErrors = Object.keys(fieldErrors).length > 0;
+
+    return hasRequiredFields && !hasFormatErrors;
   };
 
   const sections = [
@@ -436,8 +552,15 @@ export function PatientForm({
               onChange={(e) => handleChange("name", e.target.value)}
               placeholder="Enter patient's full name"
               required
-              className="mt-1.5"
+              className={`mt-1.5 ${
+                fieldErrors.name ? "border-destructive" : ""
+              }`}
             />
+            {fieldErrors.name && (
+              <p className="text-xs text-destructive mt-1">
+                {fieldErrors.name}
+              </p>
+            )}
           </div>
 
           <div className="md:col-span-2">
@@ -459,8 +582,15 @@ export function PatientForm({
               onChange={(e) => handleChange("contact_phone", e.target.value)}
               placeholder="e.g., 09123456789"
               required
-              className="mt-1.5"
+              className={`mt-1.5 ${
+                fieldErrors.contact_phone ? "border-destructive" : ""
+              }`}
             />
+            {fieldErrors.contact_phone && (
+              <p className="text-xs text-destructive mt-1">
+                {fieldErrors.contact_phone}
+              </p>
+            )}
           </div>
 
           <div>
@@ -495,17 +625,44 @@ export function PatientForm({
               type="number"
               min={0}
               max={150}
+              step={1}
               value={formData.age || ""}
-              onChange={(e) =>
-                handleChange(
-                  "age",
-                  e.target.value ? parseInt(e.target.value) : undefined
-                )
-              }
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "") {
+                  handleChange("age", undefined);
+                } else {
+                  // Check if it's a valid integer (no decimals)
+                  if (value.includes(".")) {
+                    // Reject decimal input
+                    return;
+                  }
+                  const numValue = parseInt(value);
+                  if (!isNaN(numValue)) {
+                    handleChange("age", numValue);
+                  }
+                }
+              }}
+              onBlur={(e) => {
+                // Validate on blur to catch any edge cases
+                const value = e.target.value;
+                if (value && formData.age !== undefined) {
+                  const error = validateAge(formData.age);
+                  setFieldErrors((prev) => ({
+                    ...prev,
+                    age: error || undefined,
+                  }));
+                }
+              }}
               placeholder="Enter age"
               required
-              className="mt-1.5"
+              className={`mt-1.5 ${
+                fieldErrors.age ? "border-destructive" : ""
+              }`}
             />
+            {fieldErrors.age && (
+              <p className="text-xs text-destructive mt-1">{fieldErrors.age}</p>
+            )}
           </div>
 
           <div>
@@ -584,8 +741,15 @@ export function PatientForm({
               onChange={(e) => handleChange("occupation", e.target.value)}
               placeholder="Enter occupation"
               required
-              className="mt-1.5"
+              className={`mt-1.5 ${
+                fieldErrors.occupation ? "border-destructive" : ""
+              }`}
             />
+            {fieldErrors.occupation && (
+              <p className="text-xs text-destructive mt-1">
+                {fieldErrors.occupation}
+              </p>
+            )}
           </div>
 
           <div>
@@ -678,8 +842,15 @@ export function PatientForm({
               onChange={(e) => handleChange("father_name", e.target.value)}
               placeholder="Enter father's name"
               required
-              className="mt-1.5"
+              className={`mt-1.5 ${
+                fieldErrors.father_name ? "border-destructive" : ""
+              }`}
             />
+            {fieldErrors.father_name && (
+              <p className="text-xs text-destructive mt-1">
+                {fieldErrors.father_name}
+              </p>
+            )}
           </div>
 
           <div>
@@ -692,8 +863,15 @@ export function PatientForm({
               onChange={(e) => handleChange("mother_name", e.target.value)}
               placeholder="Enter mother's name"
               required
-              className="mt-1.5"
+              className={`mt-1.5 ${
+                fieldErrors.mother_name ? "border-destructive" : ""
+              }`}
             />
+            {fieldErrors.mother_name && (
+              <p className="text-xs text-destructive mt-1">
+                {fieldErrors.mother_name}
+              </p>
+            )}
           </div>
 
           <div className="md:col-span-2">
@@ -728,8 +906,15 @@ export function PatientForm({
               }
               placeholder="Emergency contact name"
               required
-              className="mt-1.5"
+              className={`mt-1.5 ${
+                fieldErrors.nearest_relative_name ? "border-destructive" : ""
+              }`}
             />
+            {fieldErrors.nearest_relative_name && (
+              <p className="text-xs text-destructive mt-1">
+                {fieldErrors.nearest_relative_name}
+              </p>
+            )}
           </div>
 
           <div>
@@ -744,8 +929,15 @@ export function PatientForm({
               }
               placeholder="Emergency contact phone"
               required
-              className="mt-1.5"
+              className={`mt-1.5 ${
+                fieldErrors.nearest_relative_phone ? "border-destructive" : ""
+              }`}
             />
+            {fieldErrors.nearest_relative_phone && (
+              <p className="text-xs text-destructive mt-1">
+                {fieldErrors.nearest_relative_phone}
+              </p>
+            )}
           </div>
 
           <div>
@@ -758,8 +950,15 @@ export function PatientForm({
               onChange={(e) => handleChange("relationship", e.target.value)}
               placeholder="e.g., spouse, parent, sibling"
               required
-              className="mt-1.5"
+              className={`mt-1.5 ${
+                fieldErrors.relationship ? "border-destructive" : ""
+              }`}
             />
+            {fieldErrors.relationship && (
+              <p className="text-xs text-destructive mt-1">
+                {fieldErrors.relationship}
+              </p>
+            )}
           </div>
         </div>
       )}
