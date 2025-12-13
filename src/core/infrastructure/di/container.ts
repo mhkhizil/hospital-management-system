@@ -12,6 +12,7 @@ import { ApiAddressRepository } from "@/core/infrastructure/repositories/ApiAddr
 import { ApiNrcRepository } from "@/core/infrastructure/repositories/ApiNrcRepository";
 import { ApiDepartmentRepository } from "@/core/infrastructure/repositories/ApiDepartmentRepository";
 import { ApiWardRepository } from "@/core/infrastructure/repositories/ApiWardRepository";
+import { ApiReportRepository } from "@/core/infrastructure/repositories/ApiReportRepository";
 import { PatientManagementService } from "@/core/application/services/PatientManagementService";
 import { DoctorManagementService } from "@/core/application/services/DoctorManagementService";
 import { AppointmentManagementService } from "@/core/application/services/AppointmentManagementService";
@@ -24,6 +25,7 @@ import { AddressManagementService } from "@/core/application/services/AddressMan
 import { NrcManagementService } from "@/core/application/services/NrcManagementService";
 import { DepartmentManagementService } from "@/core/application/services/DepartmentManagementService";
 import { WardManagementService } from "@/core/application/services/WardManagementService";
+import { ReportManagementService } from "@/core/application/services/ReportManagementService";
 
 type Factory<T> = () => T;
 
@@ -82,6 +84,7 @@ export const TOKENS = {
   NRC_REPOSITORY: "NRC_REPOSITORY",
   DEPARTMENT_REPOSITORY: "DEPARTMENT_REPOSITORY",
   WARD_REPOSITORY: "WARD_REPOSITORY",
+  REPORT_REPOSITORY: "REPORT_REPOSITORY",
 
   // Application services
   AUTH_SERVICE: "AUTH_SERVICE",
@@ -96,6 +99,7 @@ export const TOKENS = {
   NRC_SERVICE: "NRC_SERVICE",
   DEPARTMENT_SERVICE: "DEPARTMENT_SERVICE",
   WARD_SERVICE: "WARD_SERVICE",
+  REPORT_SERVICE: "REPORT_SERVICE",
 } as const;
 
 export const container = new Container();
@@ -240,6 +244,17 @@ export function setupContainer() {
   container.register(
     TOKENS.WARD_SERVICE,
     () => new WardManagementService(container.resolve(TOKENS.WARD_REPOSITORY))
+  );
+
+  // Report repositories and services
+  container.register(
+    TOKENS.REPORT_REPOSITORY,
+    () => new ApiReportRepository(container.resolve(TOKENS.HTTP_CLIENT))
+  );
+  container.register(
+    TOKENS.REPORT_SERVICE,
+    () =>
+      new ReportManagementService(container.resolve(TOKENS.REPORT_REPOSITORY))
   );
 }
 

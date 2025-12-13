@@ -97,4 +97,5 @@ export const API_ENDPOINTS = {
     LIST: "/api/wards",
     ROOMS: (wardKey: string) => `/api/wards/${wardKey}/rooms`,
   },
+  REPORTS: "/api/reports",
 } as const;
