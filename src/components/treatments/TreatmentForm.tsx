@@ -147,7 +147,21 @@ export function TreatmentForm({
 
   const [activeSection, setActiveSection] = useState<string>("basic");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<keyof TreatmentFormDTO, string>>
+  >({});
   const [attachments, setAttachments] = useState<File[]>([]);
+
+  // Validation helper function for name fields
+  const validateNameField = (value: string): string | null => {
+    if (!value.trim()) return null; // Empty is handled by required validation
+    // Allow: letters (Unicode), spaces, hyphens, apostrophes, periods
+    const namePattern = /^[\p{L}\s\-'.]+$/u;
+    if (!namePattern.test(value)) {
+      return "Only letters, spaces, hyphens (-), apostrophes ('), and periods (.) are allowed";
+    }
+    return null;
+  };
 
   // Update form data when initialData changes (for edit mode)
   useEffect(() => {
@@ -181,6 +195,22 @@ export function TreatmentForm({
       ...prev,
       [field]: value === "" ? undefined : value,
     }));
+
+    // Validate field format in real-time
+    let formatError: string | null = null;
+    if (typeof value === "string" && value.trim()) {
+      // Name field validation
+      if (field === "treatment_name") {
+        formatError = validateNameField(value);
+      }
+    }
+
+    // Update field errors
+    setFieldErrors((prev) => ({
+      ...prev,
+      [field]: formatError || undefined,
+    }));
+
     // Clear validation errors when user makes changes
     if (validationErrors.length > 0) {
       setValidationErrors([]);
@@ -264,13 +294,20 @@ export function TreatmentForm({
       errors.push("Dosage Information is required");
     }
 
+    // Format validation
+    if (formData.treatment_name?.trim()) {
+      const nameError = validateNameField(formData.treatment_name);
+      if (nameError) errors.push(`Treatment Name: ${nameError}`);
+    }
+
     return errors;
   };
 
-  // Helper to check if all required fields are filled
+  // Helper to check if all required fields are filled and valid
   const isFormValid = (): boolean => {
     const errors = validateRequiredFields();
-    return errors.length === 0;
+    const hasFormatErrors = Object.keys(fieldErrors).length > 0;
+    return errors.length === 0 && !hasFormatErrors;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -287,6 +324,7 @@ export function TreatmentForm({
 
     // Clear errors if validation passes
     setValidationErrors([]);
+    setFieldErrors({});
     await onSubmit(formData, attachments.length > 0 ? attachments : undefined);
   };
 
@@ -414,7 +452,15 @@ export function TreatmentForm({
               onChange={(e) => handleChange("treatment_name", e.target.value)}
               placeholder="e.g., Complete Blood Count, Appendectomy"
               required
+              className={`${
+                fieldErrors.treatment_name ? "border-destructive" : ""
+              }`}
             />
+            {fieldErrors.treatment_name && (
+              <p className="text-xs text-destructive mt-1">
+                {fieldErrors.treatment_name}
+              </p>
+            )}
           </div>
 
           <div>

@@ -108,6 +108,20 @@ export function AdmissionForm({
 
   const [activeSection, setActiveSection] = useState<string>("basic");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<keyof AdmissionFormDTO, string>>
+  >({});
+
+  // Validation helper function for name fields
+  const validateNameField = (value: string): string | null => {
+    if (!value.trim()) return null; // Empty is handled by required validation
+    // Allow: letters (Unicode), spaces, hyphens, apostrophes, periods
+    const namePattern = /^[\p{L}\s\-'.]+$/u;
+    if (!namePattern.test(value)) {
+      return "Only letters, spaces, hyphens (-), apostrophes ('), and periods (.) are allowed";
+    }
+    return null;
+  };
 
   // Address state
   const [addressComponents, setAddressComponents] =
@@ -134,6 +148,22 @@ export function AdmissionForm({
       ...prev,
       [field]: value === "" ? undefined : value,
     }));
+
+    // Validate field format in real-time
+    let formatError: string | null = null;
+    if (typeof value === "string" && value.trim()) {
+      // Name field validation
+      if (field === "medical_officer") {
+        formatError = validateNameField(value);
+      }
+    }
+
+    // Update field errors
+    setFieldErrors((prev) => ({
+      ...prev,
+      [field]: formatError || undefined,
+    }));
+
     // Clear validation errors when user makes changes
     if (validationErrors.length > 0) {
       setValidationErrors([]);
@@ -204,13 +234,20 @@ export function AdmissionForm({
       }
     }
 
+    // Format validation
+    if (formData.medical_officer?.trim()) {
+      const nameError = validateNameField(formData.medical_officer);
+      if (nameError) errors.push(`Medical Officer: ${nameError}`);
+    }
+
     return errors;
   };
 
-  // Helper to check if all required fields are filled
+  // Helper to check if all required fields are filled and valid
   const isFormValid = (): boolean => {
     const errors = validateRequiredFields();
-    return errors.length === 0;
+    const hasFormatErrors = Object.keys(fieldErrors).length > 0;
+    return errors.length === 0 && !hasFormatErrors;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -227,6 +264,7 @@ export function AdmissionForm({
 
     // Clear errors if validation passes
     setValidationErrors([]);
+    setFieldErrors({});
     await onSubmit(formData);
   };
 
@@ -603,8 +641,15 @@ export function AdmissionForm({
               value={formData.medical_officer || ""}
               onChange={(e) => handleChange("medical_officer", e.target.value)}
               placeholder="Name of medical officer"
-              className="mt-1.5"
+              className={`mt-1.5 ${
+                fieldErrors.medical_officer ? "border-destructive" : ""
+              }`}
             />
+            {fieldErrors.medical_officer && (
+              <p className="text-xs text-destructive mt-1">
+                {fieldErrors.medical_officer}
+              </p>
+            )}
           </div>
         </div>
       )}
