@@ -22,7 +22,13 @@ import {
   MonthlyTrendsChart,
   AgeGroupPieChart,
 } from "@/components/dashboard/ChartComponents";
-import { Download, Calendar, RefreshCw, FileSpreadsheet, FileJson } from "lucide-react";
+import {
+  Download,
+  Calendar,
+  RefreshCw,
+  FileSpreadsheet,
+  FileJson,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import {
   DropdownMenu,
@@ -31,6 +37,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { exportToExcel } from "@/utils/excelExport";
+import { EmptyState } from "@/components/dashboard/EmptyState";
 
 export default function DashboardPage() {
   // Get last 6 months by default
@@ -45,16 +52,39 @@ export default function DashboardPage() {
   };
 
   const [dateRange, setDateRange] = useState(getDefaultDates());
-  const { reportData, dateRange: apiDateRange, isLoading, error, refreshReports } = useReports(
-    dateRange
-  );
+  const {
+    reportData,
+    dateRange: apiDateRange,
+    isLoading,
+    error,
+    refreshReports,
+  } = useReports(dateRange);
 
-  const handleDateChange = (field: "start_date" | "end_date", value: string) => {
+  const handleDateChange = (
+    field: "start_date" | "end_date",
+    value: string
+  ) => {
     setDateRange((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleRefresh = () => {
     refreshReports(dateRange);
+  };
+
+  // Check if data is empty
+  const isDataEmpty = () => {
+    if (!reportData) return true;
+
+    const summary = reportData.summary;
+    // Check if all summary values are zero
+    const hasNoData =
+      summary.total_patients === 0 &&
+      summary.total_admissions === 0 &&
+      summary.active_admissions === 0 &&
+      summary.total_treatments === 0 &&
+      summary.total_staff === 0;
+
+    return hasNoData;
   };
 
   const handleExportExcel = () => {
@@ -101,7 +131,9 @@ export default function DashboardPage() {
         </div>
         <Card className="border-destructive">
           <CardHeader>
-            <CardTitle className="text-destructive">Error Loading Data</CardTitle>
+            <CardTitle className="text-destructive">
+              Error Loading Data
+            </CardTitle>
             <CardDescription>{error}</CardDescription>
           </CardHeader>
           <CardContent>
@@ -134,7 +166,9 @@ export default function DashboardPage() {
             onClick={handleRefresh}
             disabled={isLoading}
           >
-            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+            />
             Refresh
           </Button>
           <DropdownMenu>
@@ -142,7 +176,7 @@ export default function DashboardPage() {
               <Button
                 variant="default"
                 size="sm"
-                disabled={isLoading || !reportData}
+                disabled={isLoading || !reportData || isDataEmpty()}
               >
                 <Download className="mr-2 h-4 w-4" />
                 Export Data
@@ -171,7 +205,11 @@ export default function DashboardPage() {
           </CardTitle>
           <CardDescription>
             {apiDateRange &&
-              `Showing data from ${new Date(apiDateRange.start_date).toLocaleDateString()} to ${new Date(apiDateRange.end_date).toLocaleDateString()}`}
+              `Showing data from ${new Date(
+                apiDateRange.start_date
+              ).toLocaleDateString()} to ${new Date(
+                apiDateRange.end_date
+              ).toLocaleDateString()}`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -203,17 +241,28 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Summary Stats */}
+      {/* Loading State */}
       {isLoading && !reportData ? (
         <div className="flex h-32 items-center justify-center">
           <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      ) : (
-        <StatsCards summary={reportData?.summary} />
+      ) : null}
+
+      {/* Empty State */}
+      {!isLoading && !error && (!reportData || isDataEmpty()) ? (
+        <EmptyState
+          onRefresh={handleRefresh}
+          dateRange={apiDateRange || undefined}
+        />
+      ) : null}
+
+      {/* Summary Stats */}
+      {!isLoading && !error && reportData && !isDataEmpty() && (
+        <StatsCards summary={reportData.summary} />
       )}
 
       {/* Charts Grid */}
-      {reportData && (
+      {reportData && !isDataEmpty() && (
         <div className="grid gap-4 lg:grid-cols-2">
           {/* Gender Distribution */}
           <motion.div
@@ -224,7 +273,9 @@ export default function DashboardPage() {
             <Card className="bg-card/70">
               <CardHeader>
                 <CardTitle>Gender Distribution</CardTitle>
-                <CardDescription>Patient demographics by gender</CardDescription>
+                <CardDescription>
+                  Patient demographics by gender
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <GenderPieChart data={reportData.patients.by_gender} />
@@ -377,22 +428,26 @@ export default function DashboardPage() {
                   <CardDescription>Admissions handled</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {reportData.staff_workload.doctors.slice(0, 5).map((doctor, idx) => (
-                    <div
-                      key={doctor.id}
-                      className="flex items-center justify-between rounded-lg border border-border/60 p-3"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                          {idx + 1}
+                  {reportData.staff_workload.doctors
+                    .slice(0, 5)
+                    .map((doctor, idx) => (
+                      <div
+                        key={doctor.id}
+                        className="flex items-center justify-between rounded-lg border border-border/60 p-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                            {idx + 1}
+                          </div>
+                          <span className="text-sm font-medium">
+                            {doctor.name}
+                          </span>
                         </div>
-                        <span className="text-sm font-medium">{doctor.name}</span>
+                        <span className="text-lg font-bold">
+                          {doctor.admissions_count}
+                        </span>
                       </div>
-                      <span className="text-lg font-bold">
-                        {doctor.admissions_count}
-                      </span>
-                    </div>
-                  ))}
+                    ))}
                 </CardContent>
               </Card>
             </motion.div>
@@ -411,22 +466,26 @@ export default function DashboardPage() {
                   <CardDescription>Admissions assisted</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {reportData.staff_workload.nurses.slice(0, 5).map((nurse, idx) => (
-                    <div
-                      key={nurse.id}
-                      className="flex items-center justify-between rounded-lg border border-border/60 p-3"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-sm font-semibold text-secondary">
-                          {idx + 1}
+                  {reportData.staff_workload.nurses
+                    .slice(0, 5)
+                    .map((nurse, idx) => (
+                      <div
+                        key={nurse.id}
+                        className="flex items-center justify-between rounded-lg border border-border/60 p-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-sm font-semibold text-secondary">
+                            {idx + 1}
+                          </div>
+                          <span className="text-sm font-medium">
+                            {nurse.name}
+                          </span>
                         </div>
-                        <span className="text-sm font-medium">{nurse.name}</span>
+                        <span className="text-lg font-bold">
+                          {nurse.admissions_count}
+                        </span>
                       </div>
-                      <span className="text-lg font-bold">
-                        {nurse.admissions_count}
-                      </span>
-                    </div>
-                  ))}
+                    ))}
                 </CardContent>
               </Card>
             </motion.div>
@@ -442,7 +501,9 @@ export default function DashboardPage() {
             <Card className="bg-card/70">
               <CardHeader>
                 <CardTitle>Key Metrics Summary</CardTitle>
-                <CardDescription>Important statistics at a glance</CardDescription>
+                <CardDescription>
+                  Important statistics at a glance
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-3">
@@ -451,7 +512,8 @@ export default function DashboardPage() {
                       Average Length of Stay
                     </p>
                     <p className="text-2xl font-bold">
-                      {reportData.admissions.average_length_of_stay.toFixed(1)} days
+                      {reportData.admissions.average_length_of_stay.toFixed(1)}{" "}
+                      days
                     </p>
                   </div>
                   <div className="rounded-lg border border-border/60 p-4">
@@ -459,7 +521,8 @@ export default function DashboardPage() {
                       Inpatient Admissions
                     </p>
                     <p className="text-2xl font-bold">
-                      {reportData.admissions.by_type.inpatient?.toLocaleString() || 0}
+                      {reportData.admissions.by_type.inpatient?.toLocaleString() ||
+                        0}
                     </p>
                   </div>
                   <div className="rounded-lg border border-border/60 p-4">
@@ -467,7 +530,8 @@ export default function DashboardPage() {
                       Outpatient Admissions
                     </p>
                     <p className="text-2xl font-bold">
-                      {reportData.admissions.by_type.outpatient?.toLocaleString() || 0}
+                      {reportData.admissions.by_type.outpatient?.toLocaleString() ||
+                        0}
                     </p>
                   </div>
                 </div>
@@ -482,5 +546,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-
