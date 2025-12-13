@@ -512,8 +512,11 @@ export default function DashboardPage() {
                       Average Length of Stay
                     </p>
                     <p className="text-2xl font-bold">
-                      {reportData.admissions.average_length_of_stay.toFixed(1)}{" "}
-                      days
+                      {reportData.admissions.average_length_of_stay != null
+                        ? `${reportData.admissions.average_length_of_stay.toFixed(
+                            1
+                          )} days`
+                        : "N/A"}
                     </p>
                   </div>
                   <div className="rounded-lg border border-border/60 p-4">

@@ -34,7 +34,7 @@ export interface AdmissionStatistics {
   by_department: Record<string, number>;
   admissions_over_time: TimeSeriesData[];
   discharges_over_time: TimeSeriesData[];
-  average_length_of_stay: number;
+  average_length_of_stay: number | null;
 }
 
 // Treatment statistics
@@ -111,4 +111,3 @@ export interface ReportQueryParams {
   start_date?: string; // YYYY-MM-DD
   end_date?: string; // YYYY-MM-DD
 }
-

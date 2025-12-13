@@ -1,8 +1,5 @@
 import * as XLSX from "xlsx";
-import type {
-  ReportData,
-  DateRange,
-} from "@/core/domain/entities/Report";
+import type { ReportData, DateRange } from "@/core/domain/entities/Report";
 
 /**
  * Export report data to Excel with multiple sheets
@@ -59,7 +56,10 @@ export function exportToExcel(
   // 2. Patient Demographics Sheet
   const patientDemographics = [
     { Category: "Gender Distribution", ...reportData.patients.by_gender },
-    { Category: "Blood Type Distribution", ...reportData.patients.by_blood_type },
+    {
+      Category: "Blood Type Distribution",
+      ...reportData.patients.by_blood_type,
+    },
     {
       Category: "Age Group Distribution",
       ...reportData.patients.by_age_group,
@@ -83,16 +83,10 @@ export function exportToExcel(
   }
 
   // 4. Admissions by Type
-  createKeyValueSheet(
-    reportData.admissions.by_type,
-    "Admissions by Type"
-  );
+  createKeyValueSheet(reportData.admissions.by_type, "Admissions by Type");
 
   // 5. Admissions by Status
-  createKeyValueSheet(
-    reportData.admissions.by_status,
-    "Admissions by Status"
-  );
+  createKeyValueSheet(reportData.admissions.by_status, "Admissions by Status");
 
   // 6. Admissions by Department
   createKeyValueSheet(
@@ -126,7 +120,10 @@ export function exportToExcel(
   const admissionMetrics = [
     {
       Metric: "Average Length of Stay (days)",
-      Value: reportData.admissions.average_length_of_stay.toFixed(2),
+      Value:
+        reportData.admissions.average_length_of_stay != null
+          ? reportData.admissions.average_length_of_stay.toFixed(2)
+          : "N/A",
     },
     {
       Metric: "Inpatient Admissions",
@@ -140,10 +137,7 @@ export function exportToExcel(
   createSheet(admissionMetrics, "Admission Metrics");
 
   // 10. Treatments by Type
-  createKeyValueSheet(
-    reportData.treatments.by_type,
-    "Treatments by Type"
-  );
+  createKeyValueSheet(reportData.treatments.by_type, "Treatments by Type");
 
   // 11. Treatments by Outcome
   createKeyValueSheet(
@@ -244,4 +238,3 @@ export function exportToExcel(
   // Write and download
   XLSX.writeFile(workbook, filename);
 }
-
