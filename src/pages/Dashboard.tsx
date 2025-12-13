@@ -22,8 +22,15 @@ import {
   MonthlyTrendsChart,
   AgeGroupPieChart,
 } from "@/components/dashboard/ChartComponents";
-import { Download, Calendar, RefreshCw } from "lucide-react";
+import { Download, Calendar, RefreshCw, FileSpreadsheet, FileJson } from "lucide-react";
 import { motion } from "framer-motion";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { exportToExcel } from "@/utils/excelExport";
 
 export default function DashboardPage() {
   // Get last 6 months by default
@@ -50,7 +57,12 @@ export default function DashboardPage() {
     refreshReports(dateRange);
   };
 
-  const handleExport = () => {
+  const handleExportExcel = () => {
+    if (!reportData || !apiDateRange) return;
+    exportToExcel(reportData, apiDateRange);
+  };
+
+  const handleExportJSON = () => {
     if (!reportData) return;
 
     // Create comprehensive JSON export
@@ -125,15 +137,28 @@ export default function DashboardPage() {
             <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleExport}
-            disabled={isLoading || !reportData}
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Export Data
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="default"
+                size="sm"
+                disabled={isLoading || !reportData}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Export Data
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleExportExcel}>
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                Export as Excel (.xlsx)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportJSON}>
+                <FileJson className="mr-2 h-4 w-4" />
+                Export as JSON (.json)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 

@@ -59,13 +59,13 @@ export function GenderPieChart({ data }: GenderChartProps) {
           cy="50%"
           labelLine={false}
           label={({ name, percent }) =>
-            `${name}: ${(percent * 100).toFixed(0)}%`
+            `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`
           }
           outerRadius={80}
           fill="#8884d8"
           dataKey="value"
         >
-          {chartData.map((entry, index) => (
+          {chartData.map((_, index) => (
             <Cell
               key={`cell-${index}`}
               fill={CHART_COLORS.colors[index % CHART_COLORS.colors.length]}
@@ -122,13 +122,13 @@ export function AdmissionStatusPieChart({ data }: AdmissionStatusProps) {
           cy="50%"
           labelLine={false}
           label={({ name, percent }) =>
-            `${name}: ${(percent * 100).toFixed(0)}%`
+            `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`
           }
           outerRadius={80}
           fill="#8884d8"
           dataKey="value"
         >
-          {chartData.map((entry, index) => (
+          {chartData.map((_, index) => (
             <Cell
               key={`cell-${index}`}
               fill={CHART_COLORS.colors[index % CHART_COLORS.colors.length]}
@@ -230,20 +230,11 @@ export function DepartmentBarChart({ data }: DepartmentChartProps) {
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={chartData}>
         <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-        <XAxis
-          dataKey="department"
-          angle={-45}
-          textAnchor="end"
-          height={100}
-        />
+        <XAxis dataKey="department" angle={-45} textAnchor="end" height={100} />
         <YAxis />
         <Tooltip />
         <Legend />
-        <Bar
-          dataKey="count"
-          fill={CHART_COLORS.colors[2]}
-          name="Admissions"
-        />
+        <Bar dataKey="count" fill={CHART_COLORS.colors[2]} name="Admissions" />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -332,13 +323,13 @@ export function AgeGroupPieChart({ data }: AgeGroupChartProps) {
           cy="50%"
           labelLine={false}
           label={({ name, percent }) =>
-            `${name}: ${(percent * 100).toFixed(0)}%`
+            `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`
           }
           outerRadius={80}
           fill="#8884d8"
           dataKey="value"
         >
-          {chartData.map((entry, index) => (
+          {chartData.map((_, index) => (
             <Cell
               key={`cell-${index}`}
               fill={CHART_COLORS.colors[index % CHART_COLORS.colors.length]}
@@ -351,4 +342,3 @@ export function AgeGroupPieChart({ data }: AgeGroupChartProps) {
     </ResponsiveContainer>
   );
 }
-
