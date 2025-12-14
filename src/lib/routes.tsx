@@ -18,7 +18,7 @@ import SettingsPage from "@/pages/Settings";
 /**
  * Application Router Configuration
  * Includes authentication protection for all routes
- * 
+ *
  * Role-based access:
  * - root_user: Full access to all features
  * - admission: Patient management, admissions
@@ -53,11 +53,20 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <DashboardPage /> },
+      {
+        index: true,
+        element: (
+          <ProtectedRoute allowedRoles={["root_user", "admission"]}>
+            <DashboardPage />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: "patients",
         element: (
-          <ProtectedRoute allowedRoles={["root_user", "admission", "doctor", "nurse"]}>
+          <ProtectedRoute
+            allowedRoles={["root_user", "admission", "doctor", "nurse"]}
+          >
             <PatientsPage />
           </ProtectedRoute>
         ),
@@ -65,7 +74,9 @@ export const router = createBrowserRouter([
       {
         path: "admissions",
         element: (
-          <ProtectedRoute allowedRoles={["root_user", "admission", "doctor", "nurse"]}>
+          <ProtectedRoute
+            allowedRoles={["root_user", "admission", "doctor", "nurse"]}
+          >
             <AdmissionsPage />
           </ProtectedRoute>
         ),
@@ -73,7 +84,9 @@ export const router = createBrowserRouter([
       {
         path: "treatments",
         element: (
-          <ProtectedRoute allowedRoles={["root_user", "admission", "doctor", "nurse"]}>
+          <ProtectedRoute
+            allowedRoles={["root_user", "admission", "doctor", "nurse"]}
+          >
             <TreatmentsPage />
           </ProtectedRoute>
         ),
