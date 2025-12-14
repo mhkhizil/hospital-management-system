@@ -109,10 +109,7 @@ interface PublicRouteProps {
  * Public Route Component
  * For routes that should only be accessible when NOT authenticated (e.g., login page)
  */
-export function PublicRoute({
-  children,
-  redirectTo = "/",
-}: PublicRouteProps) {
+export function PublicRoute({ children, redirectTo = "/" }: PublicRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
@@ -124,7 +121,8 @@ export function PublicRoute({
   // Redirect to dashboard if already authenticated
   if (isAuthenticated) {
     // Redirect to the page they came from, or default redirect
-    const from = (location.state as { from?: { pathname: string } })?.from?.pathname;
+    const from = (location.state as { from?: { pathname: string } })?.from
+      ?.pathname;
     return <Navigate to={from || redirectTo} replace />;
   }
 
@@ -160,8 +158,3 @@ export function RoleGate({
 
   return <>{children}</>;
 }
-
-
-
-
-

@@ -12,13 +12,22 @@ type SidebarProps = {
 };
 
 export function Sidebar({ isMobileOpen, onClose }: SidebarProps) {
-  const { user } = useAuth();
+  const { user, hasAnyRole } = useAuth();
   const isRootUser = user?.isRootUser() ?? false;
 
   // Filter navigation items based on user role
-  const visibleNavigation = mainNavigation.filter(
-    (item) => !item.rootOnly || isRootUser
-  );
+  const visibleNavigation = mainNavigation.filter((item) => {
+    // Check if item has allowedRoles restriction
+    if (item.allowedRoles && item.allowedRoles.length > 0) {
+      return hasAnyRole(item.allowedRoles);
+    }
+    // Fallback to rootOnly for backward compatibility
+    if (item.rootOnly) {
+      return isRootUser;
+    }
+    // No restrictions, show to all authenticated users
+    return true;
+  });
 
   return (
     <aside
