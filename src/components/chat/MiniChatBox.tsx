@@ -203,10 +203,14 @@ export function MiniChatBox({ className }: MiniChatBoxProps) {
       <div className={cn("fixed bottom-4 right-4 z-50", className)}>
         <Button
           onClick={handleToggleOpen}
+          variant="default"
           size="lg"
-          className="relative h-14 w-14 rounded-full shadow-lg flex items-center justify-center"
+          className="relative h-14 w-14 rounded-full shadow-lg flex items-center justify-center p-0"
         >
-          <MessageSquare className="h-5 w-5 text-primary-foreground stroke-[2]" />
+          <MessageSquare
+            className="h-7 w-7 text-primary-foreground"
+            strokeWidth={2.5}
+          />
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
