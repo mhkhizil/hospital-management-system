@@ -4,9 +4,9 @@
 import { useNavigate } from "react-router-dom";
 import { Menu, LogOut, User, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { useAuth } from "@/core/presentation/context/AuthContext";
+import { APP_VERSION } from "@/version";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,7 +70,9 @@ export function Navbar({ onMenuClick }: NavbarProps) {
           <Menu className="h-5 w-5" />
         </Button>
         <div className="w-full max-w-md">
-          <Input placeholder="Search patients, staff, visits..." />
+          <div className="flex h-10 w-full items-center rounded-md border border-input bg-transparent px-3 py-2 text-sm text-muted-foreground">
+            Version {APP_VERSION}
+          </div>
         </div>
       </div>
       <div className="flex items-center gap-3">
