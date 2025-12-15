@@ -214,7 +214,7 @@ export function MiniChatBox({ className }: MiniChatBoxProps) {
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
-              className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs"
+              className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs bg-red-700"
             >
               {unreadCount > 9 ? "9+" : unreadCount}
             </Badge>
