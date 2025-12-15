@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
+import { readFileSync } from "node:fs";
 
 const apiBase =
   process.env.VITE_API_BASE_URL ?? "https://api.nationalcancercenter.click";
@@ -42,8 +43,15 @@ const securityHeaders = {
   "Content-Security-Policy": `${baseCspDirectives.join("; ")};`,
 };
 
+// Read version from package.json
+const packageJson = JSON.parse(readFileSync("./package.json", "utf-8"));
+const appVersion = packageJson.version;
+
 export default defineConfig({
   plugins: [react()],
+  define: {
+    "import.meta.env.VITE_APP_VERSION": JSON.stringify(appVersion),
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
