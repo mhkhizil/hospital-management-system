@@ -9,7 +9,7 @@ export function AppLayout() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   return (
-    <div className="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[280px_1fr]">
+    <div className="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[280px_1fr] mt-3">
       <Sidebar
         isMobileOpen={mobileOpen}
         onClose={() => setMobileOpen(false)}
