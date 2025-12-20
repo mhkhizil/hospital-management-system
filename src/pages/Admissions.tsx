@@ -95,7 +95,8 @@ function PatientSearch({
 
   useEffect(() => {
     if (query.length >= 2) {
-      searchPatients(query);
+      // Filter out deceased patients when searching for admission
+      searchPatients(query, true);
     } else {
       clearSearchResults();
     }

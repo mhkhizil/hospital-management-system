@@ -38,7 +38,7 @@ interface UsePatientManagementResult {
 
   // Actions
   fetchPatients: (params?: PatientListParams) => Promise<void>;
-  searchPatients: (query: string) => Promise<void>;
+  searchPatients: (query: string, isNotdeceased?: boolean) => Promise<void>;
   getPatient: (id: number) => Promise<void>;
   createPatient: (data: PatientFormDTO) => Promise<PatientListDTO | null>;
   updatePatient: (
@@ -122,7 +122,7 @@ export function usePatientManagement(): UsePatientManagementResult {
    * Search patients by name, NRC, or phone
    */
   const searchPatients = useCallback(
-    async (query: string) => {
+    async (query: string, isNotdeceased?: boolean) => {
       if (!query.trim() || query.trim().length < 2) {
         setSearchResults([]);
         return;
@@ -132,7 +132,7 @@ export function usePatientManagement(): UsePatientManagementResult {
       setError(null);
 
       try {
-        const result = await service.searchPatients(query);
+        const result = await service.searchPatients(query, isNotdeceased);
         setSearchResults(result.data);
       } catch (err) {
         const message =

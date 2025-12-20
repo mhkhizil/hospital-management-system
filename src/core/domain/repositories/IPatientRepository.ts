@@ -28,8 +28,10 @@ export interface IPatientRepository {
   /**
    * Search patients by name, NRC, or phone
    * Returns up to 20 results
+   * @param query - Search query string (min 2 characters)
+   * @param isNotdeceased - Filter out deceased patients (for admission creation)
    */
-  search(query: string): Promise<PatientSearchResult>;
+  search(query: string, isNotdeceased?: boolean): Promise<PatientSearchResult>;
 
   /**
    * Get patient by ID with full details

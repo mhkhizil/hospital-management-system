@@ -305,13 +305,23 @@ export class ApiPatientRepository implements IPatientRepository {
   /**
    * Search patients by name, NRC, or phone
    */
-  async search(query: string): Promise<PatientSearchResult> {
+  async search(
+    query: string,
+    isNotdeceased?: boolean
+  ): Promise<PatientSearchResult> {
     if (query.length < 2) {
       return { total: 0, data: [] };
     }
 
+    // Build query parameters
+    const params = new URLSearchParams();
+    params.append("q", query);
+    if (isNotdeceased) {
+      params.append("isNotdeceased", "true");
+    }
+
     const { data } = await this.http.get<SearchPatientsApiResponse>(
-      `${API_ENDPOINTS.PATIENTS.SEARCH}?q=${encodeURIComponent(query)}`
+      `${API_ENDPOINTS.PATIENTS.SEARCH}?${params.toString()}`
     );
 
     return {

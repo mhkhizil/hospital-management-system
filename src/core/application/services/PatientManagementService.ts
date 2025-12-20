@@ -59,12 +59,15 @@ export class PatientManagementService {
   /**
    * Search patients by name, NRC, or phone
    */
-  async searchPatients(query: string): Promise<PatientSearchResult> {
+  async searchPatients(
+    query: string,
+    isNotdeceased?: boolean
+  ): Promise<PatientSearchResult> {
     if (!query.trim() || query.trim().length < 2) {
       return { total: 0, data: [] };
     }
 
-    const result = await this.patientRepository.search(query);
+    const result = await this.patientRepository.search(query, isNotdeceased);
 
     return {
       total: result.total,

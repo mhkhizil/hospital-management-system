@@ -20,8 +20,13 @@ export interface IPatientService {
 
   /**
    * Search patients by name, NRC, or phone
+   * @param query - Search query string (min 2 characters)
+   * @param isNotdeceased - Filter out deceased patients (for admission creation)
    */
-  searchPatients(query: string): Promise<PatientSearchResult>;
+  searchPatients(
+    query: string,
+    isNotdeceased?: boolean
+  ): Promise<PatientSearchResult>;
 
   /**
    * Get patient details by ID
